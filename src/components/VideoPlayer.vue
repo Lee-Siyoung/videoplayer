@@ -30,13 +30,13 @@
       </div>
       <button
         class="rwd"
-        @click="mediaBackward"
+        @click="windBackward"
         data-icon="B"
         aria-label="rewind"
       ></button>
       <button
         class="fwd"
-        @click="mediaForward"
+        @click="windForward"
         data-icon="F"
         aria-label="fast forward"
       ></button>
@@ -90,60 +90,22 @@ export default {
       }
     };
 
-    const mediaBackward = () => {
-      clearIntervalRwdFwd();
-
-      if (controls.value && controls.value.classList.contains("active")) {
-        controls.value.classList.remove("active");
-        if (media.value) {
-          media.value.play();
-        }
-      } else {
-        if (controls.value) {
-          controls.value.classList.add("active");
-        }
-        if (media.value) {
-          media.value.pause();
-          intervalRwd.value = setInterval(windBackward, 200);
-        }
-      }
-    };
-
-    const mediaForward = () => {
-      clearIntervalRwdFwd();
-
-      if (controls.value && controls.value.classList.contains("active")) {
-        controls.value.classList.remove("active");
-        if (media.value) {
-          media.value.play();
-        }
-      } else {
-        if (controls.value) {
-          controls.value.classList.add("active");
-        }
-        if (media.value) {
-          media.value.pause();
-          intervalFwd.value = setInterval(windForward, 200);
-        }
-      }
-    };
-
     const windBackward = () => {
       if (media.value) {
-        if (media.value.currentTime <= 3) {
+        if (media.value.currentTime <= 10) {
           stopMedia();
         } else {
-          media.value.currentTime -= 3;
+          media.value.currentTime -= 10;
         }
       }
     };
 
     const windForward = () => {
       if (media.value) {
-        if (media.value.currentTime >= media.value.duration - 3) {
+        if (media.value.currentTime >= media.value.duration - 10) {
           stopMedia();
         } else {
-          media.value.currentTime += 3;
+          media.value.currentTime += 10;
         }
       }
     };
@@ -209,10 +171,10 @@ export default {
       timerWrapper,
       timerBar,
       formattedTime,
+      windForward,
+      windBackward,
       togglePlay,
       stopMedia,
-      mediaBackward,
-      mediaForward,
       seekToTime,
       showTimeOnHover,
       hideTimeOnLeave,
