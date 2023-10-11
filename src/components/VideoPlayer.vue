@@ -1,9 +1,11 @@
 <template>
   <div class="player">
-    <h1>VideoPlayer</h1>
+    <button @click="changeMedia" data-icon="C" aria-label="change media">
+      Change Media
+    </button>
+    <h1>Movie</h1>
     <video ref="media">
-      <source src="../assets/sintel-short.mp4" type="video/mp4" />
-      <source src="../assets/sintel-short.webm" type="video/webm" />
+      <source src="$fileNames[mediaIndex]" type="video/mp4" />
     </video>
     <div class="controls" ref="controls">
       <button
@@ -49,13 +51,14 @@ import { ref, onMounted } from "vue";
 
 export default {
   setup() {
+    const fileNames = ref<string[]>([]);
+    const mediaIndex = ref(0);
     const media = ref<HTMLVideoElement | null>(null);
     const controls = ref<HTMLElement | null>(null);
     const timerWrapper = ref<HTMLElement | null>(null);
     const timerBar = ref<HTMLElement | null>(null);
     const isPlaying = ref(false);
     const formattedTime = ref("00:00");
-
     const intervalFwd = ref<number | null>(null);
     const intervalRwd = ref<number | null>(null);
 
@@ -159,13 +162,27 @@ export default {
       }
     };
 
+    const changeMedia = () => {
+      mediaIndex.value = (mediaIndex.value + 1) % fileNames.value.length;
+      /* for (const i in fileNames.value) {
+        const con: string = fileNames.value[i];
+        console.log(`${con} : ${i}`);
+      } */
+    };
+
     onMounted(() => {
+      const context = require.context("../assets", false, /\.(mp4|webm)$/);
+      const filenames = context
+        .keys()
+        .map((key) => key.replace("./", "../assets/"));
+      fileNames.value = filenames;
       if (media.value) {
         media.value.addEventListener("timeupdate", setTime);
       }
     });
 
     return {
+      fileNames,
       media,
       controls,
       timerWrapper,
@@ -178,6 +195,7 @@ export default {
       seekToTime,
       showTimeOnHover,
       hideTimeOnLeave,
+      changeMedia,
     };
   },
 };
