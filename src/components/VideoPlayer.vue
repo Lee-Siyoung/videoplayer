@@ -188,14 +188,6 @@ export default {
 
       if (media.value) {
         media.value.addEventListener("timeupdate", setTime);
-        media.value.addEventListener("loadedmetadata", () => {
-          const MAX_WIDTH = 400;
-          if (media.value) {
-            if (controls.value && media.value.clientWidth < MAX_WIDTH) {
-              controls.value.style.width = `${media.value.clientWidth}px`;
-            }
-          }
-        });
       }
     });
 
@@ -233,8 +225,8 @@ export default {
 
 video {
   border: 1px solid black;
-  max-width: 100%;
-  max-height: 80vh;
+  width: 100vh;
+  height: 80vh;
   display: block;
 }
 
@@ -350,8 +342,4 @@ button:focus {
 button:active {
   box-shadow: inset 3px 3px 2px black;
 }
-
-/* .active:before {
-  color: red;
-} */
 </style>
