@@ -2,12 +2,18 @@
   <div class="player">
     <div class="video-wrapper">
       <h1>Movie</h1>
-      <button @click="changeMedia" data-icon="C" aria-label="change media">
+      <button @click="changeMedia" aria-label="change media">
         Change Media
       </button>
+      <button @click="createTextBox" aria-label="create text box">
+        Create Text Box
+      </button>
+      <input v-model="userText" placeholder="Enter your text here" />
+
       <video ref="media">
         <source src="" type="video/mp4" />
       </video>
+      <canvas ref="canvas" width="400" height="200"></canvas>
       <div class="controls" ref="controls">
         <button
           class="play"
@@ -50,9 +56,12 @@
 
 <script lang="ts">
 import { ref, onMounted } from "vue";
-
 export default {
+  components: {},
   setup() {
+    const canvas = ref<HTMLCanvasElement | null>(null);
+    const userText = ref("");
+
     const fileNames = ref<string[]>([]);
     const mediaIndex = ref(0);
     const media = ref<HTMLVideoElement | null>(null);
@@ -63,6 +72,20 @@ export default {
     const formattedTime = ref("00:00");
     const intervalFwd = ref<number | null>(null);
     const intervalRwd = ref<number | null>(null);
+
+    const createTextBox = () => {
+      if (canvas.value) {
+        const ctx = canvas.value.getContext("2d");
+        if (ctx) {
+          ctx.fillStyle = "white";
+          ctx.fillRect(10, 10, 300, 50);
+
+          ctx.fillStyle = "black";
+          ctx.font = "24px Arial";
+          ctx.fillText(userText.value, 20, 40);
+        }
+      }
+    };
 
     const togglePlay = () => {
       if (media.value) {
@@ -206,6 +229,9 @@ export default {
       showTimeOnHover,
       hideTimeOnLeave,
       changeMedia,
+      canvas,
+      userText,
+      createTextBox,
     };
   },
 };
@@ -221,6 +247,13 @@ export default {
     url("../assets/fonts/heydings_controls-webfont.ttf") format("truetype");
   font-weight: normal;
   font-style: normal;
+}
+canvas {
+  border: 1px solid black;
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
 }
 
 video {
