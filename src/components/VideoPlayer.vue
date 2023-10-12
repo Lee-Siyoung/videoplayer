@@ -1,47 +1,49 @@
 <template>
   <div class="player">
-    <button @click="changeMedia" data-icon="C" aria-label="change media">
-      Change Media
-    </button>
-    <h1>Movie</h1>
-    <video ref="media">
-      <source src="$fileNames[mediaIndex]" type="video/mp4" />
-    </video>
-    <div class="controls" ref="controls">
-      <button
-        class="play"
-        @click="togglePlay"
-        data-icon="P"
-        aria-label="play pause toggle"
-      ></button>
-      <button
-        class="stop"
-        @click="stopMedia"
-        data-icon="S"
-        aria-label="stop"
-      ></button>
-      <div
-        class="timer"
-        ref="timerWrapper"
-        @click="seekToTime"
-        @mousemove="showTimeOnHover"
-        @mouseleave="hideTimeOnLeave"
-      >
-        <div ref="timerBar"></div>
-        <span aria-label="timer">{{ formattedTime }}</span>
+    <div class="video-wrapper">
+      <h1>Movie</h1>
+      <button @click="changeMedia" data-icon="C" aria-label="change media">
+        Change Media
+      </button>
+      <video ref="media">
+        <source src="" type="video/mp4" />
+      </video>
+      <div class="controls" ref="controls">
+        <button
+          class="play"
+          @click="togglePlay"
+          data-icon="P"
+          aria-label="play pause toggle"
+        ></button>
+        <button
+          class="stop"
+          @click="stopMedia"
+          data-icon="S"
+          aria-label="stop"
+        ></button>
+        <div
+          class="timer"
+          ref="timerWrapper"
+          @click="seekToTime"
+          @mousemove="showTimeOnHover"
+          @mouseleave="hideTimeOnLeave"
+        >
+          <div ref="timerBar"></div>
+          <span aria-label="timer">{{ formattedTime }}</span>
+        </div>
+        <button
+          class="rwd"
+          @click="windBackward"
+          data-icon="B"
+          aria-label="rewind"
+        ></button>
+        <button
+          class="fwd"
+          @click="windForward"
+          data-icon="F"
+          aria-label="fast forward"
+        ></button>
       </div>
-      <button
-        class="rwd"
-        @click="windBackward"
-        data-icon="B"
-        aria-label="rewind"
-      ></button>
-      <button
-        class="fwd"
-        @click="windForward"
-        data-icon="F"
-        aria-label="fast forward"
-      ></button>
     </div>
   </div>
 </template>
@@ -164,10 +166,13 @@ export default {
 
     const changeMedia = () => {
       mediaIndex.value = (mediaIndex.value + 1) % fileNames.value.length;
-      /* for (const i in fileNames.value) {
-        const con: string = fileNames.value[i];
-        console.log(`${con} : ${i}`);
-      } */
+
+      if (media.value) {
+        media.value.src = fileNames.value[mediaIndex.value];
+        media.value.load();
+        media.value.play();
+      }
+      console.log(mediaIndex.value);
     };
 
     onMounted(() => {
@@ -176,8 +181,21 @@ export default {
         .keys()
         .map((key) => key.replace("./", "../assets/"));
       fileNames.value = filenames;
+      if (media.value && fileNames.value.length > 0) {
+        media.value.src = fileNames.value[mediaIndex.value];
+        media.value.load();
+      }
+
       if (media.value) {
         media.value.addEventListener("timeupdate", setTime);
+        media.value.addEventListener("loadedmetadata", () => {
+          const MAX_WIDTH = 400;
+          if (media.value) {
+            if (controls.value && media.value.clientWidth < MAX_WIDTH) {
+              controls.value.style.width = `${media.value.clientWidth}px`;
+            }
+          }
+        });
       }
     });
 
@@ -215,6 +233,9 @@ export default {
 
 video {
   border: 1px solid black;
+  max-width: 100%;
+  max-height: 80vh;
+  display: block;
 }
 
 p {
@@ -223,7 +244,14 @@ p {
 }
 
 .player {
-  position: absolute;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.video-wrapper {
+  position: relative;
 }
 
 .controls {
@@ -231,13 +259,14 @@ p {
   width: 400px;
   border-radius: 10px;
   position: absolute;
-  bottom: 20px;
+  bottom: 10px;
   left: 50%;
-  margin-left: -200px;
   background-color: black;
   box-shadow: 3px 3px 5px black;
   transition: 1s all;
   display: flex;
+  z-index: 10;
+  transform: translateX(-50%);
 }
 
 button,
@@ -245,8 +274,8 @@ button,
   background: linear-gradient(to bottom, #222, #666);
 }
 
-.player:hover .controls,
-player:focus .controls {
+.video-wrapper:hover .controls,
+.video-wrapper:focus .controls {
   opacity: 1;
 }
 
