@@ -5,15 +5,24 @@
       <button @click="changeMedia" aria-label="change media">
         Change Media
       </button>
-      <button @click="createTextBox" aria-label="create text box">
-        Create Text Box
-      </button>
-      <input v-model="userText" placeholder="Enter your text here" />
-
-      <video ref="media">
-        <source src="" type="video/mp4" />
-      </video>
-      <canvas ref="canvas" width="400" height="200"></canvas>
+      <button @click="toggleTextEdit" aria-label="Text Edit">Text Edit</button>
+      <div class="test">
+        <video ref="media">
+          <source src="" type="video/mp4" />
+        </video>
+        <canvas
+          ref="canvas"
+          @click="onCanvasClick"
+          v-bind:style="{ 'pointer-events': isEditing ? 'auto' : 'none' }"
+        ></canvas>
+        <input
+          v-if="hasInput"
+          ref="textInput"
+          type="text"
+          v-bind:style="inputStyle"
+          @keydown.enter="handleEnter"
+        />
+      </div>
       <div class="controls" ref="controls">
         <button
           class="play"
@@ -55,12 +64,16 @@
 </template>
 
 <script lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, onMounted, nextTick } from "vue";
 export default {
   components: {},
   setup() {
     const canvas = ref<HTMLCanvasElement | null>(null);
-    const userText = ref("");
+    const textInput = ref<HTMLInputElement | null>(null);
+    const hasInput = ref(false);
+    const inputStyle = ref({});
+    const ctx = ref<CanvasRenderingContext2D | null>(null);
+    const isEditing = ref(false);
 
     const fileNames = ref<string[]>([]);
     const mediaIndex = ref(0);
@@ -73,17 +86,47 @@ export default {
     const intervalFwd = ref<number | null>(null);
     const intervalRwd = ref<number | null>(null);
 
-    const createTextBox = () => {
-      if (canvas.value) {
-        const ctx = canvas.value.getContext("2d");
-        if (ctx) {
-          ctx.fillStyle = "white";
-          ctx.fillRect(10, 10, 300, 50);
+    const toggleTextEdit = () => {
+      isEditing.value = !isEditing.value;
+    };
+    const onCanvasClick = (event: MouseEvent) => {
+      const targetElement = event.target as HTMLElement;
+      const rect = targetElement.getBoundingClientRect();
+      if (hasInput.value) return;
+      if (isEditing.value && !hasInput.value) {
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+        console.log("클릭 x,y 위치 : ", x, y);
+        addInput(x, y);
+      }
+    };
+    const addInput = (x: number, y: number) => {
+      inputStyle.value = {
+        position: "absolute",
+        left: `${x}px`,
+        top: `${y + 110}px`,
+      };
+      console.log("input x,y 위치 : ", inputStyle.value);
+      hasInput.value = true;
 
-          ctx.fillStyle = "black";
-          ctx.font = "24px Arial";
-          ctx.fillText(userText.value, 20, 40);
-        }
+      nextTick(() => {
+        textInput.value?.focus();
+      });
+    };
+    const handleEnter = () => {
+      if (textInput.value) {
+        const x = parseInt(textInput.value.style.left, 10);
+        const y = parseInt(textInput.value.style.top, 10);
+        drawText(textInput.value.value, x, y - 110);
+        hasInput.value = false;
+        console.log("엔터 x,y 위치 : ", x, y);
+      }
+    };
+    const drawText = (txt: string, x: number, y: number) => {
+      if (ctx.value) {
+        ctx.value.textBaseline = "top";
+        ctx.value.font = "14px sans-serif";
+        ctx.value.fillText(txt, x, y);
       }
     };
 
@@ -209,9 +252,18 @@ export default {
         media.value.load();
       }
 
-      if (media.value) {
-        media.value.addEventListener("timeupdate", setTime);
+      if (canvas.value) {
+        ctx.value = canvas.value.getContext("2d") as CanvasRenderingContext2D;
       }
+
+      media.value?.addEventListener("loadedmetadata", () => {
+        if (canvas.value && media.value) {
+          const computedStyle = getComputedStyle(media.value);
+          canvas.value.width = parseInt(computedStyle.width, 10);
+          canvas.value.height = parseInt(computedStyle.height, 10);
+          media.value.addEventListener("timeupdate", setTime);
+        }
+      });
     });
 
     return {
@@ -230,8 +282,13 @@ export default {
       hideTimeOnLeave,
       changeMedia,
       canvas,
-      userText,
-      createTextBox,
+      textInput,
+      hasInput,
+      inputStyle,
+      onCanvasClick,
+      handleEnter,
+      toggleTextEdit,
+      isEditing,
     };
   },
 };
@@ -248,19 +305,20 @@ export default {
   font-weight: normal;
   font-style: normal;
 }
-canvas {
-  border: 1px solid black;
-  position: absolute;
-  top: 0;
-  left: 0;
-  pointer-events: none;
+input {
+  margin: 0;
+  padding: 0;
 }
 
-video {
+video,
+canvas {
   border: 1px solid black;
   width: 100vh;
-  height: 80vh;
-  display: block;
+  height: 50vh;
+}
+canvas {
+  position: absolute;
+  left: 0;
 }
 
 p {
