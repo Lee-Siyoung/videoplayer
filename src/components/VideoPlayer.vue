@@ -6,6 +6,7 @@
         Change Media
       </button>
       <button @click="toggleTextEdit" aria-label="Text Edit">Text Edit</button>
+      <button @click="capture">Capture and Save Frame</button>
       <div class="test">
         <video ref="media">
           <source src="" type="video/mp4" />
@@ -85,6 +86,39 @@ export default {
     const formattedTime = ref("00:00");
     const intervalFwd = ref<number | null>(null);
     const intervalRwd = ref<number | null>(null);
+
+    const capture = () => {
+      if (ctx.value && media.value && canvas.value) {
+        const originalWidth = canvas.value.width;
+        const originalHeight = canvas.value.height;
+
+        canvas.value.width = media.value.videoWidth;
+        canvas.value.height = media.value.videoHeight;
+        ctx.value.drawImage(
+          media.value,
+          0,
+          0,
+          canvas.value?.width,
+          canvas.value?.height
+        );
+        canvas.value.toBlob((blob) => {
+          if (blob && canvas.value && media.value && ctx.value) {
+            const imageUrl = URL.createObjectURL(blob);
+
+            const link = document.createElement("a");
+            link.href = imageUrl;
+            link.download = "captured_frame.png";
+            link.click();
+
+            URL.revokeObjectURL(imageUrl);
+
+            canvas.value.width = originalWidth;
+            canvas.value.height = originalHeight;
+            ctx.value.clearRect(0, 0, originalWidth, originalHeight);
+          }
+        }, "image/png");
+      }
+    };
 
     const toggleTextEdit = () => {
       isEditing.value = !isEditing.value;
@@ -289,6 +323,7 @@ export default {
       handleEnter,
       toggleTextEdit,
       isEditing,
+      capture,
     };
   },
 };
