@@ -6,7 +6,7 @@
         Change Media
       </button>
       <button @click="toggleTextEdit" aria-label="Text Edit">Text Edit</button>
-      <button @click="capture">Capture and Save Frame</button>
+      <button @click="capture">Capture</button>
       <div class="test">
         <video ref="media">
           <source src="" type="video/mp4" />
@@ -89,8 +89,11 @@ export default {
 
     const capture = () => {
       if (ctx.value && media.value && canvas.value) {
-        const originalWidth = canvas.value.width;
-        const originalHeight = canvas.value.height;
+        const tempCanvas = document.createElement("canvas");
+        const tempCtx = tempCanvas.getContext("2d");
+        tempCanvas.width = canvas.value.width;
+        tempCanvas.height = canvas.value.height;
+        tempCtx?.drawImage(canvas.value, 0, 0);
 
         canvas.value.width = media.value.videoWidth;
         canvas.value.height = media.value.videoHeight;
@@ -112,9 +115,9 @@ export default {
 
             URL.revokeObjectURL(imageUrl);
 
-            canvas.value.width = originalWidth;
-            canvas.value.height = originalHeight;
-            ctx.value.clearRect(0, 0, originalWidth, originalHeight);
+            canvas.value.width = tempCanvas.width;
+            canvas.value.height = tempCanvas.height;
+            ctx.value.drawImage(tempCanvas, 0, 0);
           }
         }, "image/png");
       }
