@@ -104,6 +104,13 @@ export default {
           canvas.value?.width,
           canvas.value?.height
         );
+        ctx.value.drawImage(
+          tempCanvas,
+          0,
+          0,
+          canvas.value.width,
+          canvas.value.height
+        );
         canvas.value.toBlob((blob) => {
           if (blob && canvas.value && media.value && ctx.value) {
             const imageUrl = URL.createObjectURL(blob);
