@@ -357,8 +357,8 @@ input {
 
 video,
 canvas {
-  border: 1px solid black;
-  width: 100vh;
+  /* border: 1px solid black;
+  width: 100vh; */
   height: 50vh;
 }
 canvas {
