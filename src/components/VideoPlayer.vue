@@ -89,7 +89,7 @@ export default {
   components: { VideoCapture },
   setup() {
     const state = reactive<State>({
-      isEditing: false,
+      isEditing: true,
       hasInput: false,
       mediaIndex: 0,
       fileNames: [],
@@ -111,6 +111,46 @@ export default {
     const controls = ref<HTMLElement | null>(null);
     const timerWrapper = ref<HTMLElement | null>(null);
     const progressbar = ref<HTMLElement | null>(null);
+
+    const drawCanvas = () => {
+      if (canvas.value && ctx.value && mediaEl.value) {
+        const videoAspectRatio =
+          mediaEl.value.videoWidth / mediaEl.value.videoHeight;
+        const canvasAspectRatio = canvas.value.width / canvas.value.height;
+
+        const { drawWidth, drawHeight, xStart, yStart } = (() => {
+          if (videoAspectRatio < canvasAspectRatio) {
+            const height = canvas.value.height;
+            const width = height * videoAspectRatio;
+            return {
+              drawWidth: width,
+              drawHeight: height,
+              xStart: (canvas.value.width - width) / 2,
+              yStart: 0,
+            };
+          } else {
+            const width = canvas.value.width;
+            const height = width / videoAspectRatio;
+            return {
+              drawWidth: width,
+              drawHeight: height,
+              xStart: 0,
+              yStart: (canvas.value.height - height) / 2,
+            };
+          }
+        })();
+
+        ctx.value.drawImage(
+          mediaEl.value,
+          xStart,
+          yStart,
+          drawWidth,
+          drawHeight
+        );
+
+        requestAnimationFrame(drawCanvas);
+      }
+    };
 
     const toggleTextEdit = () => {
       state.isEditing = !state.isEditing;
@@ -163,6 +203,7 @@ export default {
         if (mediaEl.value.paused) {
           mediaEl.value.play();
           state.isPlaying = true;
+          drawCanvas();
         } else {
           mediaEl.value.pause();
           state.isPlaying = false;
@@ -284,11 +325,13 @@ export default {
       }
 
       mediaEl.value?.addEventListener("loadedmetadata", () => {
-        if (canvas.value && mediaEl.value) {
+        if (canvas.value && mediaEl.value && ctx.value) {
           const computedStyle = getComputedStyle(mediaEl.value);
           canvas.value.width = parseInt(computedStyle.width, 10);
           canvas.value.height = parseInt(computedStyle.height, 10);
           mediaEl.value.addEventListener("timeupdate", setTime);
+          drawCanvas();
+          mediaEl.value.play();
         }
       });
     });
@@ -335,15 +378,15 @@ input {
   padding: 0;
 }
 
-video,
 canvas {
-  /* border: 1px solid black;
-  width: 100vh; */
+  /* border: 1px solid black; */
   height: 50vh;
+  width: 100vh;
 }
-canvas {
-  position: absolute;
-  left: 0;
+video {
+  height: 50vh;
+  width: 100vh;
+  display: none;
 }
 
 p {
