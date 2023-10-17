@@ -14,10 +14,10 @@
         <canvas
           ref="canvas"
           @click="onCanvasClick"
-          v-bind:style="{ 'pointer-events': isEditing ? 'auto' : 'none' }"
+          v-bind:style="{ 'pointer-events': state.isEditing ? 'auto' : 'none' }"
         ></canvas>
         <input
-          v-if="hasInput"
+          v-if="state.hasInput"
           ref="textInput"
           type="text"
           v-bind:style="inputStyle"
@@ -45,7 +45,7 @@
           @mouseleave="hideTimeOnLeave"
         >
           <div ref="progressbar"></div>
-          <span aria-label="timer">{{ formattedTime }}</span>
+          <span aria-label="timer">{{ state.formattedTime }}</span>
         </div>
         <button
           class="rwd"
@@ -74,38 +74,52 @@ interface InputStyle {
   top: string;
 }
 
+interface State {
+  isEditing: boolean;
+  hasInput: boolean;
+  mediaIndex: number;
+  fileNames: string[];
+  isPlaying: boolean;
+  formattedTime: string;
+  intervalFwd: number;
+  intervalRwd: number;
+}
+
 export default {
   components: { VideoCapture },
   setup() {
+    const state = reactive<State>({
+      isEditing: false,
+      hasInput: false,
+      mediaIndex: 0,
+      fileNames: [],
+      isPlaying: false,
+      formattedTime: "00:00",
+      intervalFwd: 0,
+      intervalRwd: 0,
+    });
     const canvas = ref<HTMLCanvasElement | null>(null);
     const ctx = ref<CanvasRenderingContext2D | null>(null);
     const textInput = ref<HTMLInputElement | null>(null);
-    const hasInput = ref(false);
     const inputStyle = ref<InputStyle>({
       position: "absolute",
       left: "0px",
       top: "0px",
     });
-    const isEditing = ref(false);
 
-    const fileNames = ref<string[]>([]);
-    const mediaIndex = ref(0);
     const mediaEl = ref<HTMLVideoElement | null>(null);
     const controls = ref<HTMLElement | null>(null);
     const timerWrapper = ref<HTMLElement | null>(null);
     const progressbar = ref<HTMLElement | null>(null);
-    const isPlaying = ref(false);
-    const formattedTime = ref("00:00");
-    const intervalFwd = ref<number | null>(null);
-    const intervalRwd = ref<number | null>(null);
 
     const toggleTextEdit = () => {
-      isEditing.value = !isEditing.value;
+      state.isEditing = !state.isEditing;
     };
+
     const onCanvasClick = (event: MouseEvent) => {
       const targetElement = event.target as HTMLElement;
       const rect = targetElement.getBoundingClientRect();
-      if (isEditing.value && !hasInput.value) {
+      if (state.isEditing && !state.hasInput) {
         const x = event.clientX - rect.left;
         const y = event.clientY - rect.top;
         console.log("클릭 x,y 위치 : ", x, y);
@@ -120,7 +134,7 @@ export default {
         top: `${y + 110}px`,
       };
       console.log("input x,y 위치 : ", inputStyle.value);
-      hasInput.value = true;
+      state.hasInput = true;
 
       nextTick(() => {
         textInput.value?.focus();
@@ -131,7 +145,7 @@ export default {
         const x = parseInt(textInput.value.style.left, 10);
         const y = parseInt(textInput.value.style.top, 10);
         drawText(textInput.value.value, x, y - 110);
-        hasInput.value = false;
+        state.hasInput = false;
         console.log("엔터 x,y 위치 : ", x, y);
       }
     };
@@ -148,10 +162,10 @@ export default {
         clearIntervalRwdFwd();
         if (mediaEl.value.paused) {
           mediaEl.value.play();
-          isPlaying.value = true;
+          state.isPlaying = true;
         } else {
           mediaEl.value.pause();
-          isPlaying.value = false;
+          state.isPlaying = false;
         }
       }
     };
@@ -161,16 +175,16 @@ export default {
         clearIntervalRwdFwd();
         mediaEl.value.pause();
         mediaEl.value.currentTime = 0;
-        isPlaying.value = false;
+        state.isPlaying = false;
       }
     };
 
     const clearIntervalRwdFwd = () => {
-      if (intervalRwd.value) {
-        clearInterval(intervalRwd.value);
+      if (state.intervalRwd) {
+        clearInterval(state.intervalRwd);
       }
-      if (intervalFwd.value) {
-        clearInterval(intervalFwd.value);
+      if (state.intervalFwd) {
+        clearInterval(state.intervalFwd);
       }
     };
 
@@ -203,7 +217,7 @@ export default {
         const secondValue = seconds.toString().padStart(2, "0");
 
         const mediaTime = `${minuteValue}:${secondValue}`;
-        formattedTime.value = mediaTime;
+        state.formattedTime = mediaTime;
 
         const barLength =
           (mediaEl.value.currentTime / mediaEl.value.duration) *
@@ -233,7 +247,7 @@ export default {
         const seconds = Math.floor(hoverTime - minutes * 60);
         const minuteValue = minutes.toString().padStart(2, "0");
         const secondValue = seconds.toString().padStart(2, "0");
-        formattedTime.value = `${minuteValue}:${secondValue}`;
+        state.formattedTime = `${minuteValue}:${secondValue}`;
       }
     };
 
@@ -244,14 +258,14 @@ export default {
     };
 
     const changeMedia = () => {
-      mediaIndex.value = (mediaIndex.value + 1) % fileNames.value.length;
+      state.mediaIndex = (state.mediaIndex + 1) % state.fileNames.length;
 
       if (mediaEl.value) {
-        mediaEl.value.src = fileNames.value[mediaIndex.value];
+        mediaEl.value.src = state.fileNames[state.mediaIndex];
         mediaEl.value.load();
         mediaEl.value.play();
       }
-      console.log(mediaIndex.value);
+      console.log(state.mediaIndex);
     };
 
     onMounted(() => {
@@ -259,9 +273,9 @@ export default {
       const filenames = context
         .keys()
         .map((key) => key.replace("./", "../assets/"));
-      fileNames.value = filenames;
-      if (mediaEl.value && fileNames.value.length > 0) {
-        mediaEl.value.src = fileNames.value[mediaIndex.value];
+      state.fileNames = filenames;
+      if (mediaEl.value && state.fileNames.length > 0) {
+        mediaEl.value.src = state.fileNames[state.mediaIndex];
         mediaEl.value.load();
       }
 
@@ -280,12 +294,11 @@ export default {
     });
 
     return {
-      fileNames,
+      state,
       mediaEl,
       controls,
       timerWrapper,
       progressbar,
-      formattedTime,
       Forward,
       Backward,
       togglePlay,
@@ -297,12 +310,10 @@ export default {
       canvas,
       ctx,
       textInput,
-      hasInput,
       inputStyle,
       onCanvasClick,
       handleEnter,
       toggleTextEdit,
-      isEditing,
     };
   },
 };
