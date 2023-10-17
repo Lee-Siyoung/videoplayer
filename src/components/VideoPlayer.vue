@@ -65,7 +65,7 @@
 </template>
 
 <script lang="ts">
-import { ref, onMounted, nextTick, reactive } from "vue";
+import { ref, onMounted, nextTick, reactive, defineComponent } from "vue";
 import VideoCapture from "./VideoCapture.vue";
 
 interface InputStyle {
@@ -85,7 +85,7 @@ interface State {
   intervalRwd: number;
 }
 
-export default {
+export default defineComponent({
   components: { VideoCapture },
   setup() {
     const state = reactive<State>({
@@ -359,7 +359,7 @@ export default {
       toggleTextEdit,
     };
   },
-};
+});
 </script>
 
 <style scoped>
