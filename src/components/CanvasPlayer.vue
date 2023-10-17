@@ -5,24 +5,11 @@
       <button @click="changeMedia" aria-label="change media">
         Change Media
       </button>
-      <button @click="toggleTextEdit" aria-label="Text Edit">Text Edit</button>
-      <VideoCapture :canvas="canvas" :mediaEl="mediaEl" :ctx="ctx" />
       <div class="test">
         <video ref="mediaEl">
           <source src="" type="video/mp4" />
         </video>
-        <canvas
-          ref="canvas"
-          @click="onCanvasClick"
-          v-bind:style="{ 'pointer-events': state.isEditing ? 'auto' : 'none' }"
-        ></canvas>
-        <input
-          v-if="state.hasInput"
-          ref="textInput"
-          type="text"
-          v-bind:style="inputStyle"
-          @keydown.enter="handleEnter"
-        />
+        <canvas ref="canvas"></canvas>
       </div>
       <div class="controls" ref="controls">
         <button
@@ -41,11 +28,12 @@
           class="timer"
           ref="timerWrapper"
           @click="seekToTime"
-          @mousemove="showTimeOnHover"
           @mouseleave="hideTimeOnLeave"
         >
           <div ref="progressbar"></div>
-          <span aria-label="timer">{{ state.formattedTime }}</span>
+          <span aria-label="timer"
+            >{{ state.formattedTime }} / {{ state.mediaDuration }}</span
+          >
         </div>
         <button
           class="rwd"
@@ -65,14 +53,7 @@
 </template>
 
 <script lang="ts">
-import { ref, onMounted, nextTick, reactive, defineComponent } from "vue";
-import VideoCapture from "./VideoCapture.vue";
-
-interface InputStyle {
-  position: string;
-  left: string;
-  top: string;
-}
+import { ref, onMounted, reactive, defineComponent } from "vue";
 
 interface State {
   isEditing: boolean;
@@ -81,12 +62,13 @@ interface State {
   fileNames: string[];
   isPlaying: boolean;
   formattedTime: string;
+  mediaDuration: string;
   intervalFwd: number;
   intervalRwd: number;
 }
 
 export default defineComponent({
-  components: { VideoCapture },
+  components: {},
   setup() {
     const state = reactive<State>({
       isEditing: true,
@@ -95,17 +77,12 @@ export default defineComponent({
       fileNames: [],
       isPlaying: false,
       formattedTime: "00:00",
+      mediaDuration: "00:00",
       intervalFwd: 0,
       intervalRwd: 0,
     });
     const canvas = ref<HTMLCanvasElement | null>(null);
     const ctx = ref<CanvasRenderingContext2D | null>(null);
-    const textInput = ref<HTMLInputElement | null>(null);
-    const inputStyle = ref<InputStyle>({
-      position: "absolute",
-      left: "0px",
-      top: "0px",
-    });
 
     const mediaEl = ref<HTMLVideoElement | null>(null);
     const controls = ref<HTMLElement | null>(null);
@@ -149,51 +126,6 @@ export default defineComponent({
         );
 
         requestAnimationFrame(drawCanvas);
-      }
-    };
-
-    const toggleTextEdit = () => {
-      state.isEditing = !state.isEditing;
-    };
-
-    const onCanvasClick = (event: MouseEvent) => {
-      const targetElement = event.target as HTMLElement;
-      const rect = targetElement.getBoundingClientRect();
-      if (state.isEditing && !state.hasInput) {
-        const x = event.clientX - rect.left;
-        const y = event.clientY - rect.top;
-        console.log("클릭 x,y 위치 : ", x, y);
-        addInput(x, y);
-      }
-    };
-
-    const addInput = (x: number, y: number) => {
-      inputStyle.value = {
-        position: "absolute",
-        left: `${x}px`,
-        top: `${y + 110}px`,
-      };
-      console.log("input x,y 위치 : ", inputStyle.value);
-      state.hasInput = true;
-
-      nextTick(() => {
-        textInput.value?.focus();
-      });
-    };
-    const handleEnter = () => {
-      if (textInput.value) {
-        const x = parseInt(textInput.value.style.left, 10);
-        const y = parseInt(textInput.value.style.top, 10);
-        drawText(textInput.value.value, x, y - 110);
-        state.hasInput = false;
-        console.log("엔터 x,y 위치 : ", x, y);
-      }
-    };
-    const drawText = (txt: string, x: number, y: number) => {
-      if (ctx.value) {
-        ctx.value.textBaseline = "top";
-        ctx.value.font = "14px sans-serif";
-        ctx.value.fillText(txt, x, y);
       }
     };
 
@@ -253,12 +185,19 @@ export default defineComponent({
       if (mediaEl.value && timerWrapper.value && progressbar.value) {
         const minutes = Math.floor(mediaEl.value.currentTime / 60);
         const seconds = Math.floor(mediaEl.value.currentTime - minutes * 60);
+        const totalMinutes = Math.floor(mediaEl.value.duration / 60);
+        const totalSeconds = Math.floor(mediaEl.value.duration % 60);
 
         const minuteValue = minutes.toString().padStart(2, "0");
         const secondValue = seconds.toString().padStart(2, "0");
+        const totalMinuteValue = totalMinutes.toString().padStart(2, "0");
+        const totalSecondValue = totalSeconds.toString().padStart(2, "0");
 
         const mediaTime = `${minuteValue}:${secondValue}`;
         state.formattedTime = mediaTime;
+
+        const mediaDuration = `${totalMinuteValue}:${totalSecondValue}`;
+        state.mediaDuration = mediaDuration;
 
         const barLength =
           (mediaEl.value.currentTime / mediaEl.value.duration) *
@@ -274,21 +213,6 @@ export default defineComponent({
         const barWidth = barRect.width;
         const newTime = (clickX / barWidth) * mediaEl.value.duration;
         mediaEl.value.currentTime = newTime;
-      }
-    };
-
-    const showTimeOnHover = (event: MouseEvent) => {
-      if (mediaEl.value && timerWrapper.value) {
-        const barRect = timerWrapper.value.getBoundingClientRect();
-        const hoverX = event.clientX - barRect.left;
-        const barWidth = barRect.width;
-
-        const hoverTime = (hoverX / barWidth) * mediaEl.value.duration;
-        const minutes = Math.floor(hoverTime / 60);
-        const seconds = Math.floor(hoverTime - minutes * 60);
-        const minuteValue = minutes.toString().padStart(2, "0");
-        const secondValue = seconds.toString().padStart(2, "0");
-        state.formattedTime = `${minuteValue}:${secondValue}`;
       }
     };
 
@@ -347,16 +271,10 @@ export default defineComponent({
       togglePlay,
       stopMedia,
       seekToTime,
-      showTimeOnHover,
       hideTimeOnLeave,
       changeMedia,
       canvas,
       ctx,
-      textInput,
-      inputStyle,
-      onCanvasClick,
-      handleEnter,
-      toggleTextEdit,
     };
   },
 });
@@ -410,7 +328,7 @@ p {
   width: 400px;
   border-radius: 10px;
   position: absolute;
-  bottom: 10px;
+  bottom: -50px;
   left: 50%;
   background-color: black;
   box-shadow: 3px 3px 5px black;
