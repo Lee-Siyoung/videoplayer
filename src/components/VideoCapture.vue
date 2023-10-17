@@ -6,13 +6,12 @@
 import { defineComponent, PropType } from "vue";
 
 export default defineComponent({
-  name: "CaptureComponent",
   props: {
     canvas: {
       type: Object as PropType<HTMLCanvasElement | null>,
       required: true,
     },
-    media: {
+    mediaEl: {
       type: Object as PropType<HTMLVideoElement | null>,
       required: true,
     },
@@ -23,20 +22,20 @@ export default defineComponent({
   },
   setup(props) {
     const capture = () => {
-      const { ctx, media, canvas } = props;
-      if (ctx && media && canvas) {
+      const { ctx, mediaEl, canvas } = props;
+      if (ctx && mediaEl && canvas) {
         const tempCanvas = document.createElement("canvas");
         const tempCtx = tempCanvas.getContext("2d");
         tempCanvas.width = canvas.width;
         tempCanvas.height = canvas.height;
         tempCtx?.drawImage(canvas, 0, 0);
 
-        canvas.width = media.videoWidth;
-        canvas.height = media.videoHeight;
-        ctx.drawImage(media, 0, 0, canvas.width, canvas.height);
+        canvas.width = mediaEl.videoWidth;
+        canvas.height = mediaEl.videoHeight;
+        ctx.drawImage(mediaEl, 0, 0, canvas.width, canvas.height);
         ctx.drawImage(tempCanvas, 0, 0, canvas.width, canvas.height);
         canvas.toBlob((blob) => {
-          if (blob && canvas && media && ctx) {
+          if (blob && canvas && mediaEl && ctx) {
             const imageUrl = URL.createObjectURL(blob);
 
             const link = document.createElement("a");

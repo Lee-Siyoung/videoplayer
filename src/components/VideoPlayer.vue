@@ -6,9 +6,9 @@
         Change Media
       </button>
       <button @click="toggleTextEdit" aria-label="Text Edit">Text Edit</button>
-      <VideoCapture :canvas="canvas" :media="media" :ctx="ctx" />
+      <VideoCapture :canvas="canvas" :mediaEl="mediaEl" :ctx="ctx" />
       <div class="test">
-        <video ref="media">
+        <video ref="mediaEl">
           <source src="" type="video/mp4" />
         </video>
         <canvas
@@ -44,18 +44,18 @@
           @mousemove="showTimeOnHover"
           @mouseleave="hideTimeOnLeave"
         >
-          <div ref="timerBar"></div>
+          <div ref="progressbar"></div>
           <span aria-label="timer">{{ formattedTime }}</span>
         </div>
         <button
           class="rwd"
-          @click="windBackward"
+          @click="Backward"
           data-icon="B"
           aria-label="rewind"
         ></button>
         <button
           class="fwd"
-          @click="windForward"
+          @click="Forward"
           data-icon="F"
           aria-label="fast forward"
         ></button>
@@ -65,24 +65,35 @@
 </template>
 
 <script lang="ts">
-import { ref, onMounted, nextTick } from "vue";
+import { ref, onMounted, nextTick, reactive } from "vue";
 import VideoCapture from "./VideoCapture.vue";
+
+interface InputStyle {
+  position: string;
+  left: string;
+  top: string;
+}
+
 export default {
   components: { VideoCapture },
   setup() {
     const canvas = ref<HTMLCanvasElement | null>(null);
+    const ctx = ref<CanvasRenderingContext2D | null>(null);
     const textInput = ref<HTMLInputElement | null>(null);
     const hasInput = ref(false);
-    const inputStyle = ref({});
-    const ctx = ref<CanvasRenderingContext2D | null>(null);
+    const inputStyle = ref<InputStyle>({
+      position: "absolute",
+      left: "0px",
+      top: "0px",
+    });
     const isEditing = ref(false);
 
     const fileNames = ref<string[]>([]);
     const mediaIndex = ref(0);
-    const media = ref<HTMLVideoElement | null>(null);
+    const mediaEl = ref<HTMLVideoElement | null>(null);
     const controls = ref<HTMLElement | null>(null);
     const timerWrapper = ref<HTMLElement | null>(null);
-    const timerBar = ref<HTMLElement | null>(null);
+    const progressbar = ref<HTMLElement | null>(null);
     const isPlaying = ref(false);
     const formattedTime = ref("00:00");
     const intervalFwd = ref<number | null>(null);
@@ -94,7 +105,6 @@ export default {
     const onCanvasClick = (event: MouseEvent) => {
       const targetElement = event.target as HTMLElement;
       const rect = targetElement.getBoundingClientRect();
-      if (hasInput.value) return;
       if (isEditing.value && !hasInput.value) {
         const x = event.clientX - rect.left;
         const y = event.clientY - rect.top;
@@ -102,6 +112,7 @@ export default {
         addInput(x, y);
       }
     };
+
     const addInput = (x: number, y: number) => {
       inputStyle.value = {
         position: "absolute",
@@ -133,23 +144,23 @@ export default {
     };
 
     const togglePlay = () => {
-      if (media.value) {
+      if (mediaEl.value) {
         clearIntervalRwdFwd();
-        if (media.value.paused) {
-          media.value.play();
+        if (mediaEl.value.paused) {
+          mediaEl.value.play();
           isPlaying.value = true;
         } else {
-          media.value.pause();
+          mediaEl.value.pause();
           isPlaying.value = false;
         }
       }
     };
 
     const stopMedia = () => {
-      if (media.value) {
+      if (mediaEl.value) {
         clearIntervalRwdFwd();
-        media.value.pause();
-        media.value.currentTime = 0;
+        mediaEl.value.pause();
+        mediaEl.value.currentTime = 0;
         isPlaying.value = false;
       }
     };
@@ -163,30 +174,30 @@ export default {
       }
     };
 
-    const windBackward = () => {
-      if (media.value) {
-        if (media.value.currentTime <= 10) {
+    const Backward = () => {
+      if (mediaEl.value) {
+        if (mediaEl.value.currentTime <= 10) {
           stopMedia();
         } else {
-          media.value.currentTime -= 10;
+          mediaEl.value.currentTime -= 10;
         }
       }
     };
 
-    const windForward = () => {
-      if (media.value) {
-        if (media.value.currentTime >= media.value.duration - 10) {
+    const Forward = () => {
+      if (mediaEl.value) {
+        if (mediaEl.value.currentTime >= mediaEl.value.duration - 10) {
           stopMedia();
         } else {
-          media.value.currentTime += 10;
+          mediaEl.value.currentTime += 10;
         }
       }
     };
 
     const setTime = () => {
-      if (media.value && timerWrapper.value && timerBar.value) {
-        const minutes = Math.floor(media.value.currentTime / 60);
-        const seconds = Math.floor(media.value.currentTime - minutes * 60);
+      if (mediaEl.value && timerWrapper.value && progressbar.value) {
+        const minutes = Math.floor(mediaEl.value.currentTime / 60);
+        const seconds = Math.floor(mediaEl.value.currentTime - minutes * 60);
 
         const minuteValue = minutes.toString().padStart(2, "0");
         const secondValue = seconds.toString().padStart(2, "0");
@@ -195,29 +206,29 @@ export default {
         formattedTime.value = mediaTime;
 
         const barLength =
-          (media.value.currentTime / media.value.duration) *
+          (mediaEl.value.currentTime / mediaEl.value.duration) *
             timerWrapper.value.clientWidth || 0;
-        timerBar.value.style.width = barLength + "px";
+        progressbar.value.style.width = barLength + "px";
       }
     };
 
     const seekToTime = (event: MouseEvent) => {
-      if (media.value && timerWrapper.value) {
+      if (mediaEl.value && timerWrapper.value) {
         const barRect = timerWrapper.value.getBoundingClientRect();
         const clickX = event.clientX - barRect.left;
         const barWidth = barRect.width;
-        const newTime = (clickX / barWidth) * media.value.duration;
-        media.value.currentTime = newTime;
+        const newTime = (clickX / barWidth) * mediaEl.value.duration;
+        mediaEl.value.currentTime = newTime;
       }
     };
 
     const showTimeOnHover = (event: MouseEvent) => {
-      if (media.value && timerWrapper.value) {
+      if (mediaEl.value && timerWrapper.value) {
         const barRect = timerWrapper.value.getBoundingClientRect();
         const hoverX = event.clientX - barRect.left;
         const barWidth = barRect.width;
 
-        const hoverTime = (hoverX / barWidth) * media.value.duration;
+        const hoverTime = (hoverX / barWidth) * mediaEl.value.duration;
         const minutes = Math.floor(hoverTime / 60);
         const seconds = Math.floor(hoverTime - minutes * 60);
         const minuteValue = minutes.toString().padStart(2, "0");
@@ -227,7 +238,7 @@ export default {
     };
 
     const hideTimeOnLeave = () => {
-      if (media.value) {
+      if (mediaEl.value) {
         setTime();
       }
     };
@@ -235,10 +246,10 @@ export default {
     const changeMedia = () => {
       mediaIndex.value = (mediaIndex.value + 1) % fileNames.value.length;
 
-      if (media.value) {
-        media.value.src = fileNames.value[mediaIndex.value];
-        media.value.load();
-        media.value.play();
+      if (mediaEl.value) {
+        mediaEl.value.src = fileNames.value[mediaIndex.value];
+        mediaEl.value.load();
+        mediaEl.value.play();
       }
       console.log(mediaIndex.value);
     };
@@ -249,34 +260,34 @@ export default {
         .keys()
         .map((key) => key.replace("./", "../assets/"));
       fileNames.value = filenames;
-      if (media.value && fileNames.value.length > 0) {
-        media.value.src = fileNames.value[mediaIndex.value];
-        media.value.load();
+      if (mediaEl.value && fileNames.value.length > 0) {
+        mediaEl.value.src = fileNames.value[mediaIndex.value];
+        mediaEl.value.load();
       }
 
       if (canvas.value) {
         ctx.value = canvas.value.getContext("2d") as CanvasRenderingContext2D;
       }
 
-      media.value?.addEventListener("loadedmetadata", () => {
-        if (canvas.value && media.value) {
-          const computedStyle = getComputedStyle(media.value);
+      mediaEl.value?.addEventListener("loadedmetadata", () => {
+        if (canvas.value && mediaEl.value) {
+          const computedStyle = getComputedStyle(mediaEl.value);
           canvas.value.width = parseInt(computedStyle.width, 10);
           canvas.value.height = parseInt(computedStyle.height, 10);
-          media.value.addEventListener("timeupdate", setTime);
+          mediaEl.value.addEventListener("timeupdate", setTime);
         }
       });
     });
 
     return {
       fileNames,
-      media,
+      mediaEl,
       controls,
       timerWrapper,
-      timerBar,
+      progressbar,
       formattedTime,
-      windForward,
-      windBackward,
+      Forward,
+      Backward,
       togglePlay,
       stopMedia,
       seekToTime,
