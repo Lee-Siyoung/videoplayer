@@ -20,16 +20,11 @@
         ></button>
         <button
           class="stop"
-          @click="stopMedia"
+          @click="toggleStop"
           data-icon="S"
           aria-label="stop"
         ></button>
-        <div
-          class="timer"
-          ref="timerWrapper"
-          @click="seekToTime"
-          @mouseleave="hideTimeOnLeave"
-        >
+        <div class="timer" ref="timerWrapper" @click="seekToTime">
           <div ref="progressbar"></div>
           <span aria-label="timer"
             >{{ state.formattedTime }} / {{ state.mediaDuration }}</span
@@ -85,7 +80,6 @@ export default defineComponent({
     });
     const canvas = ref<HTMLCanvasElement | null>(null);
     const ctx = ref<CanvasRenderingContext2D | null>(null);
-
     const mediaEl = ref<HTMLVideoElement | null>(null);
     const controls = ref<HTMLElement | null>(null);
     const timerWrapper = ref<HTMLElement | null>(null);
@@ -126,8 +120,10 @@ export default defineComponent({
           drawWidth,
           drawHeight
         );
-
-        requestAnimationFrame(drawCanvas);
+        if (state.isPlaying) {
+          requestAnimationFrame(drawCanvas);
+          console.log("requestAnimationFrame이 돌아감");
+        }
       }
     };
 
@@ -145,7 +141,7 @@ export default defineComponent({
       }
     };
 
-    const stopMedia = () => {
+    const toggleStop = () => {
       if (mediaEl.value) {
         clearIntervalRwdFwd();
         mediaEl.value.pause();
@@ -166,7 +162,7 @@ export default defineComponent({
     const Backward = () => {
       if (mediaEl.value) {
         if (mediaEl.value.currentTime <= 10) {
-          stopMedia();
+          toggleStop();
         } else {
           mediaEl.value.currentTime -= 10;
         }
@@ -176,7 +172,7 @@ export default defineComponent({
     const Forward = () => {
       if (mediaEl.value) {
         if (mediaEl.value.currentTime >= mediaEl.value.duration - 10) {
-          stopMedia();
+          toggleStop();
         } else {
           mediaEl.value.currentTime += 10;
         }
@@ -217,13 +213,6 @@ export default defineComponent({
         mediaEl.value.currentTime = newTime;
       }
     };
-
-    const hideTimeOnLeave = () => {
-      if (mediaEl.value) {
-        setTime();
-      }
-    };
-
     const startDrag = (event: MouseEvent) => {
       state.isDragging = true;
       seekToTime(event);
@@ -247,7 +236,6 @@ export default defineComponent({
         mediaEl.value.load();
         mediaEl.value.play();
       }
-      console.log(state.mediaIndex);
     };
 
     onMounted(() => {
@@ -289,9 +277,8 @@ export default defineComponent({
       Forward,
       Backward,
       togglePlay,
-      stopMedia,
+      toggleStop,
       seekToTime,
-      hideTimeOnLeave,
       changeMedia,
       canvas,
       ctx,
