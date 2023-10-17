@@ -6,7 +6,7 @@
         Change Media
       </button>
       <button @click="toggleTextEdit" aria-label="Text Edit">Text Edit</button>
-      <button @click="capture">Capture</button>
+      <VideoCapture :canvas="canvas" :media="media" :ctx="ctx" />
       <div class="test">
         <video ref="media">
           <source src="" type="video/mp4" />
@@ -66,8 +66,9 @@
 
 <script lang="ts">
 import { ref, onMounted, nextTick } from "vue";
+import VideoCapture from "./VideoCapture.vue";
 export default {
-  components: {},
+  components: { VideoCapture },
   setup() {
     const canvas = ref<HTMLCanvasElement | null>(null);
     const textInput = ref<HTMLInputElement | null>(null);
@@ -86,49 +87,6 @@ export default {
     const formattedTime = ref("00:00");
     const intervalFwd = ref<number | null>(null);
     const intervalRwd = ref<number | null>(null);
-
-    const capture = () => {
-      if (ctx.value && media.value && canvas.value) {
-        const tempCanvas = document.createElement("canvas");
-        const tempCtx = tempCanvas.getContext("2d");
-        tempCanvas.width = canvas.value.width;
-        tempCanvas.height = canvas.value.height;
-        tempCtx?.drawImage(canvas.value, 0, 0);
-
-        canvas.value.width = media.value.videoWidth;
-        canvas.value.height = media.value.videoHeight;
-        ctx.value.drawImage(
-          media.value,
-          0,
-          0,
-          canvas.value?.width,
-          canvas.value?.height
-        );
-        ctx.value.drawImage(
-          tempCanvas,
-          0,
-          0,
-          canvas.value.width,
-          canvas.value.height
-        );
-        canvas.value.toBlob((blob) => {
-          if (blob && canvas.value && media.value && ctx.value) {
-            const imageUrl = URL.createObjectURL(blob);
-
-            const link = document.createElement("a");
-            link.href = imageUrl;
-            link.download = "captured_frame.png";
-            link.click();
-
-            URL.revokeObjectURL(imageUrl);
-
-            canvas.value.width = tempCanvas.width;
-            canvas.value.height = tempCanvas.height;
-            ctx.value.drawImage(tempCanvas, 0, 0);
-          }
-        }, "image/png");
-      }
-    };
 
     const toggleTextEdit = () => {
       isEditing.value = !isEditing.value;
@@ -326,6 +284,7 @@ export default {
       hideTimeOnLeave,
       changeMedia,
       canvas,
+      ctx,
       textInput,
       hasInput,
       inputStyle,
@@ -333,7 +292,6 @@ export default {
       handleEnter,
       toggleTextEdit,
       isEditing,
-      capture,
     };
   },
 };
