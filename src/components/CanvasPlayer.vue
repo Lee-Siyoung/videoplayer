@@ -65,6 +65,7 @@ interface State {
   mediaDuration: string;
   intervalFwd: number;
   intervalRwd: number;
+  isDragging: boolean;
 }
 
 export default defineComponent({
@@ -80,6 +81,7 @@ export default defineComponent({
       mediaDuration: "00:00",
       intervalFwd: 0,
       intervalRwd: 0,
+      isDragging: false,
     });
     const canvas = ref<HTMLCanvasElement | null>(null);
     const ctx = ref<CanvasRenderingContext2D | null>(null);
@@ -222,6 +224,21 @@ export default defineComponent({
       }
     };
 
+    const startDrag = (event: MouseEvent) => {
+      state.isDragging = true;
+      seekToTime(event);
+    };
+
+    const duringDrag = (event: MouseEvent) => {
+      if (state.isDragging) {
+        seekToTime(event);
+      }
+    };
+
+    const endDrag = () => {
+      state.isDragging = false;
+    };
+
     const changeMedia = () => {
       state.mediaIndex = (state.mediaIndex + 1) % state.fileNames.length;
 
@@ -247,6 +264,9 @@ export default defineComponent({
       if (canvas.value) {
         ctx.value = canvas.value.getContext("2d") as CanvasRenderingContext2D;
       }
+      timerWrapper.value?.addEventListener("mousedown", startDrag);
+      timerWrapper.value?.addEventListener("mousemove", duringDrag);
+      document.addEventListener("mouseup", endDrag);
 
       mediaEl.value?.addEventListener("loadedmetadata", () => {
         if (canvas.value && mediaEl.value && ctx.value) {
