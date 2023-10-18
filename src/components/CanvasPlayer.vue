@@ -55,12 +55,13 @@ interface State {
   hasInput: boolean;
   mediaIndex: number;
   fileNames: string[];
-  isPlaying: boolean;
   formattedTime: string;
   mediaDuration: string;
   intervalFwd: number;
   intervalRwd: number;
   isDragging: boolean;
+  animationFrameId: number;
+  skipTime: number;
 }
 
 export default defineComponent({
@@ -71,12 +72,13 @@ export default defineComponent({
       hasInput: false,
       mediaIndex: 0,
       fileNames: [],
-      isPlaying: false,
       formattedTime: "00:00",
       mediaDuration: "00:00",
       intervalFwd: 0,
       intervalRwd: 0,
       isDragging: false,
+      animationFrameId: 0,
+      skipTime: 10,
     });
     const canvas = ref<HTMLCanvasElement | null>(null);
     const ctx = ref<CanvasRenderingContext2D | null>(null);
@@ -120,10 +122,8 @@ export default defineComponent({
           drawWidth,
           drawHeight
         );
-        if (state.isPlaying) {
-          requestAnimationFrame(drawCanvas);
-          console.log("requestAnimationFrame이 돌아감");
-        }
+        state.animationFrameId = requestAnimationFrame(drawCanvas);
+        console.log("requestAnimationFrame이 돌아감", state.animationFrameId);
       }
     };
 
@@ -132,11 +132,11 @@ export default defineComponent({
         clearIntervalRwdFwd();
         if (mediaEl.value.paused) {
           mediaEl.value.play();
-          state.isPlaying = true;
           drawCanvas();
         } else {
           mediaEl.value.pause();
-          state.isPlaying = false;
+          cancelAnimationFrame(state.animationFrameId);
+          console.log("requestAnimationFrame이 끝남", state.animationFrameId);
         }
       }
     };
@@ -146,7 +146,6 @@ export default defineComponent({
         clearIntervalRwdFwd();
         mediaEl.value.pause();
         mediaEl.value.currentTime = 0;
-        state.isPlaying = false;
       }
     };
 
@@ -161,20 +160,24 @@ export default defineComponent({
 
     const Backward = () => {
       if (mediaEl.value) {
-        if (mediaEl.value.currentTime <= 10) {
+        if (mediaEl.value.currentTime <= state.skipTime) {
+          mediaEl.value.currentTime = 0;
           toggleStop();
         } else {
-          mediaEl.value.currentTime -= 10;
+          mediaEl.value.currentTime -= state.skipTime;
         }
       }
     };
 
     const Forward = () => {
       if (mediaEl.value) {
-        if (mediaEl.value.currentTime >= mediaEl.value.duration - 10) {
-          toggleStop();
+        if (
+          mediaEl.value.currentTime >=
+          mediaEl.value.duration - state.skipTime
+        ) {
+          mediaEl.value.currentTime = mediaEl.value.duration;
         } else {
-          mediaEl.value.currentTime += 10;
+          mediaEl.value.currentTime += state.skipTime;
         }
       }
     };
