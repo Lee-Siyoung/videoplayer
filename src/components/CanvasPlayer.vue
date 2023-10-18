@@ -32,13 +32,13 @@
         </div>
         <button
           class="rwd"
-          @click="Backward"
+          @click="goBackward"
           data-icon="B"
           aria-label="rewind"
         ></button>
         <button
           class="fwd"
-          @click="Forward"
+          @click="goForward"
           data-icon="F"
           aria-label="fast forward"
         ></button>
@@ -114,7 +114,6 @@ export default defineComponent({
             };
           }
         })();
-
         ctx.value.drawImage(
           mediaEl.value,
           xStart,
@@ -146,6 +145,8 @@ export default defineComponent({
         clearIntervalRwdFwd();
         mediaEl.value.pause();
         mediaEl.value.currentTime = 0;
+        cancelAnimationFrame(state.animationFrameId);
+        console.log("requestAnimationFrame이 끝남", state.animationFrameId);
       }
     };
 
@@ -158,7 +159,7 @@ export default defineComponent({
       }
     };
 
-    const Backward = () => {
+    const goBackward = () => {
       if (mediaEl.value) {
         if (mediaEl.value.currentTime <= state.skipTime) {
           mediaEl.value.currentTime = 0;
@@ -166,10 +167,13 @@ export default defineComponent({
         } else {
           mediaEl.value.currentTime -= state.skipTime;
         }
+        drawCanvas();
+        cancelAnimationFrame(state.animationFrameId);
+        console.log("requestAnimationFrame이 끝남", state.animationFrameId);
       }
     };
 
-    const Forward = () => {
+    const goForward = () => {
       if (mediaEl.value) {
         if (
           mediaEl.value.currentTime >=
@@ -179,6 +183,9 @@ export default defineComponent({
         } else {
           mediaEl.value.currentTime += state.skipTime;
         }
+        drawCanvas();
+        cancelAnimationFrame(state.animationFrameId);
+        console.log("requestAnimationFrame이 끝남", state.animationFrameId);
       }
     };
 
@@ -204,6 +211,10 @@ export default defineComponent({
           (mediaEl.value.currentTime / mediaEl.value.duration) *
             timerWrapper.value.clientWidth || 0;
         progressbar.value.style.width = barLength + "px";
+        if (state.mediaDuration === state.formattedTime) {
+          cancelAnimationFrame(state.animationFrameId);
+          console.log("requestAnimationFrame이 끝남", state.animationFrameId);
+        }
       }
     };
 
@@ -214,6 +225,9 @@ export default defineComponent({
         const barWidth = barRect.width;
         const newTime = (clickX / barWidth) * mediaEl.value.duration;
         mediaEl.value.currentTime = newTime;
+        drawCanvas();
+        cancelAnimationFrame(state.animationFrameId);
+        console.log("requestAnimationFrame이 끝남", state.animationFrameId);
       }
     };
     const startDrag = (event: MouseEvent) => {
@@ -264,9 +278,11 @@ export default defineComponent({
           const computedStyle = getComputedStyle(mediaEl.value);
           canvas.value.width = parseInt(computedStyle.width, 10);
           canvas.value.height = parseInt(computedStyle.height, 10);
-          mediaEl.value.addEventListener("timeupdate", setTime);
-          drawCanvas();
-          mediaEl.value.play();
+          mediaEl.value.addEventListener("timeupdate", () => {
+            setTime();
+            drawCanvas();
+            cancelAnimationFrame(state.animationFrameId);
+          });
         }
       });
     });
@@ -277,8 +293,8 @@ export default defineComponent({
       controls,
       timerWrapper,
       progressbar,
-      Forward,
-      Backward,
+      goForward,
+      goBackward,
       togglePlay,
       toggleStop,
       seekToTime,
@@ -314,7 +330,7 @@ canvas {
 video {
   height: 50vh;
   width: 100vh;
-  display: none;
+  /* display: none; */
 }
 
 p {
