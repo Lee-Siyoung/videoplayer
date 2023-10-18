@@ -51,8 +51,6 @@
 import { ref, onMounted, reactive, defineComponent } from "vue";
 
 interface State {
-  isEditing: boolean;
-  hasInput: boolean;
   mediaIndex: number;
   fileNames: string[];
   formattedTime: string;
@@ -68,8 +66,6 @@ export default defineComponent({
   components: {},
   setup() {
     const state = reactive<State>({
-      isEditing: true,
-      hasInput: false,
       mediaIndex: 0,
       fileNames: [],
       formattedTime: "00:00",
@@ -121,8 +117,13 @@ export default defineComponent({
           drawWidth,
           drawHeight
         );
-        state.animationFrameId = requestAnimationFrame(drawCanvas);
-        console.log("requestAnimationFrame이 돌아감", state.animationFrameId);
+        if (mediaEl.value.paused) {
+          cancelAnimationFrame(state.animationFrameId);
+          console.log("requestAnimationFrame이 끝남", state.animationFrameId);
+        } else {
+          state.animationFrameId = requestAnimationFrame(drawCanvas);
+          console.log("requestAnimationFrame이 돌아감", state.animationFrameId);
+        }
       }
     };
 
@@ -134,8 +135,6 @@ export default defineComponent({
           drawCanvas();
         } else {
           mediaEl.value.pause();
-          cancelAnimationFrame(state.animationFrameId);
-          console.log("requestAnimationFrame이 끝남", state.animationFrameId);
         }
       }
     };
@@ -145,8 +144,6 @@ export default defineComponent({
         clearIntervalRwdFwd();
         mediaEl.value.pause();
         mediaEl.value.currentTime = 0;
-        cancelAnimationFrame(state.animationFrameId);
-        console.log("requestAnimationFrame이 끝남", state.animationFrameId);
       }
     };
 
@@ -168,8 +165,6 @@ export default defineComponent({
           mediaEl.value.currentTime -= state.skipTime;
         }
         drawCanvas();
-        cancelAnimationFrame(state.animationFrameId);
-        console.log("requestAnimationFrame이 끝남", state.animationFrameId);
       }
     };
 
@@ -184,8 +179,6 @@ export default defineComponent({
           mediaEl.value.currentTime += state.skipTime;
         }
         drawCanvas();
-        cancelAnimationFrame(state.animationFrameId);
-        console.log("requestAnimationFrame이 끝남", state.animationFrameId);
       }
     };
 
@@ -211,10 +204,6 @@ export default defineComponent({
           (mediaEl.value.currentTime / mediaEl.value.duration) *
             timerWrapper.value.clientWidth || 0;
         progressbar.value.style.width = barLength + "px";
-        if (state.mediaDuration === state.formattedTime) {
-          cancelAnimationFrame(state.animationFrameId);
-          console.log("requestAnimationFrame이 끝남", state.animationFrameId);
-        }
       }
     };
 
@@ -226,8 +215,6 @@ export default defineComponent({
         const newTime = (clickX / barWidth) * mediaEl.value.duration;
         mediaEl.value.currentTime = newTime;
         drawCanvas();
-        cancelAnimationFrame(state.animationFrameId);
-        console.log("requestAnimationFrame이 끝남", state.animationFrameId);
       }
     };
     const startDrag = (event: MouseEvent) => {
@@ -251,7 +238,6 @@ export default defineComponent({
       if (mediaEl.value) {
         mediaEl.value.src = state.fileNames[state.mediaIndex];
         mediaEl.value.load();
-        mediaEl.value.play();
       }
     };
 
@@ -278,10 +264,12 @@ export default defineComponent({
           const computedStyle = getComputedStyle(mediaEl.value);
           canvas.value.width = parseInt(computedStyle.width, 10);
           canvas.value.height = parseInt(computedStyle.height, 10);
+          drawCanvas();
+          cancelAnimationFrame(state.animationFrameId);
+          setTime();
           mediaEl.value.addEventListener("timeupdate", () => {
             setTime();
             drawCanvas();
-            cancelAnimationFrame(state.animationFrameId);
           });
         }
       });
