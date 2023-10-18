@@ -119,7 +119,6 @@ export default defineComponent({
         );
         if (mediaEl.value.paused) {
           cancelAnimationFrame(state.animationFrameId);
-          console.log("requestAnimationFrame이 끝남", state.animationFrameId);
         } else {
           state.animationFrameId = requestAnimationFrame(drawCanvas);
           console.log("requestAnimationFrame이 돌아감", state.animationFrameId);
@@ -237,7 +236,6 @@ export default defineComponent({
 
       if (mediaEl.value) {
         mediaEl.value.src = state.fileNames[state.mediaIndex];
-        mediaEl.value.load();
       }
     };
 
@@ -249,7 +247,6 @@ export default defineComponent({
       state.fileNames = filenames;
       if (mediaEl.value && state.fileNames.length > 0) {
         mediaEl.value.src = state.fileNames[state.mediaIndex];
-        mediaEl.value.load();
       }
 
       if (canvas.value) {
@@ -317,7 +314,7 @@ canvas {
 video {
   height: 50vh;
   width: 100vh;
-  /* display: none; */
+  display: none;
 }
 
 p {
