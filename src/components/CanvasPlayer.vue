@@ -264,8 +264,7 @@ export default defineComponent({
           const computedStyle = getComputedStyle(mediaEl.value);
           canvas.value.width = parseInt(computedStyle.width, 10);
           canvas.value.height = parseInt(computedStyle.height, 10);
-          drawCanvas();
-          cancelAnimationFrame(state.animationFrameId);
+          mediaEl.value.play();
           setTime();
           mediaEl.value.addEventListener("timeupdate", () => {
             setTime();
