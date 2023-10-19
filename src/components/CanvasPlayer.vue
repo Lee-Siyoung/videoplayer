@@ -1,7 +1,7 @@
 <template>
   <div class="player">
     <div class="video-wrapper">
-      <h1>Movie</h1>
+      <h1>{{ fpsDisplay }}</h1>
       <button @click="changeMedia" aria-label="change media">
         Change Media
       </button>
@@ -48,7 +48,7 @@
 </template>
 
 <script lang="ts">
-import { ref, onMounted, reactive, defineComponent } from "vue";
+import { ref, onMounted, reactive, defineComponent, computed } from "vue";
 
 interface State {
   mediaIndex: number;
@@ -60,6 +60,16 @@ interface State {
   isDragging: boolean;
   animationFrameId: number;
   skipTime: number;
+  lastMediaTime: number;
+  lastFrameNum: number;
+  fpsRounder: number[];
+  frameSeek: boolean;
+  fps: number;
+  timeCode: string;
+}
+interface VideoMetadata {
+  mediaTime: number;
+  presentedFrames: number;
 }
 
 export default defineComponent({
@@ -75,6 +85,12 @@ export default defineComponent({
       isDragging: false,
       animationFrameId: 0,
       skipTime: 10,
+      lastMediaTime: 0,
+      lastFrameNum: 0,
+      fpsRounder: [],
+      frameSeek: true,
+      fps: 0,
+      timeCode: "00:00:00:00",
     });
     const canvas = ref<HTMLCanvasElement | null>(null);
     const ctx = ref<CanvasRenderingContext2D | null>(null);
@@ -83,12 +99,49 @@ export default defineComponent({
     const timerWrapper = ref<HTMLElement | null>(null);
     const progressbar = ref<HTMLElement | null>(null);
 
+    const fpsDisplay = computed(() => {
+      return `FPS: ${state.fps}`;
+    });
+    const getFpsAverage = () => {
+      return (
+        state.fpsRounder.reduce((a, b) => a + b, 0) / state.fpsRounder.length
+      );
+    };
+
+    const ticker = (timeupdate: number, metadata: VideoMetadata) => {
+      const mediaTimeDiff = Math.abs(metadata.mediaTime - state.lastMediaTime);
+      const frameNumDiff = Math.abs(
+        metadata.presentedFrames - state.lastFrameNum
+      );
+      const diff = mediaTimeDiff / frameNumDiff;
+      if (
+        diff &&
+        diff < 1 &&
+        state.frameSeek &&
+        state.fpsRounder.length < 50 &&
+        mediaEl.value?.playbackRate === 1 &&
+        document.hasFocus()
+      ) {
+        state.fpsRounder.push(diff);
+        state.fps = Math.round(1 / getFpsAverage());
+      }
+      state.frameSeek = true;
+      state.lastMediaTime = metadata.mediaTime;
+      state.lastFrameNum = metadata.presentedFrames;
+      mediaEl.value?.requestVideoFrameCallback(ticker);
+    };
+    const handleSeek = () => {
+      if (state.fpsRounder.length > 0) {
+        state.fpsRounder.pop();
+      }
+      state.frameSeek = false;
+    };
+
     const drawCanvas = () => {
       if (canvas.value && ctx.value && mediaEl.value) {
         const videoAspectRatio =
           mediaEl.value.videoWidth / mediaEl.value.videoHeight;
         const canvasAspectRatio = canvas.value.width / canvas.value.height;
-
         const { drawWidth, drawHeight, xStart, yStart } = (() => {
           if (videoAspectRatio < canvasAspectRatio) {
             const height = canvas.value.height;
@@ -261,6 +314,7 @@ export default defineComponent({
           const computedStyle = getComputedStyle(mediaEl.value);
           canvas.value.width = parseInt(computedStyle.width, 10);
           canvas.value.height = parseInt(computedStyle.height, 10);
+          mediaEl.value.requestVideoFrameCallback(ticker);
           mediaEl.value.play();
           setTime();
           mediaEl.value.addEventListener("timeupdate", () => {
@@ -285,6 +339,8 @@ export default defineComponent({
       changeMedia,
       canvas,
       ctx,
+      fpsDisplay,
+      handleSeek,
     };
   },
 });
