@@ -1,7 +1,7 @@
 <template>
   <div class="player">
     <div class="video-wrapper">
-      <h1>{{ fpsDisplay }}</h1>
+      <h1>{{ state.timeCode }} / {{ state.metaData.fps[state.mediaIndex] }}</h1>
       <button @click="changeMedia" aria-label="change media">
         Change Media
       </button>
@@ -60,16 +60,26 @@ interface State {
   isDragging: boolean;
   animationFrameId: number;
   skipTime: number;
-  lastMediaTime: number;
+  /* lastMediaTime: number;
   lastFrameNum: number;
   fpsRounder: number[];
   frameSeek: boolean;
-  fps: number;
+  fps: number;*/
   timeCode: string;
+  metaData: MetaData;
 }
-interface VideoMetadata {
+/* interface VideoMetadata {
   mediaTime: number;
   presentedFrames: number;
+} */
+
+interface MetaData {
+  width: number[];
+  height: number[];
+  videoBitrate: number[];
+  fps: number[];
+  audioBitrate: number[];
+  audioSample: number[];
 }
 
 export default defineComponent({
@@ -85,12 +95,20 @@ export default defineComponent({
       isDragging: false,
       animationFrameId: 0,
       skipTime: 10,
-      lastMediaTime: 0,
+      /* lastMediaTime: 0,
       lastFrameNum: 0,
       fpsRounder: [],
       frameSeek: true,
-      fps: 0,
+      fps: 0, */
       timeCode: "00:00:00:00",
+      metaData: {
+        width: [720, 1080],
+        height: [306, 1918],
+        videoBitrate: [1332, 1082],
+        fps: [24, 23.98],
+        audioBitrate: [149, 0],
+        audioSample: [48, 0],
+      },
     });
     const canvas = ref<HTMLCanvasElement | null>(null);
     const ctx = ref<CanvasRenderingContext2D | null>(null);
@@ -99,7 +117,26 @@ export default defineComponent({
     const timerWrapper = ref<HTMLElement | null>(null);
     const progressbar = ref<HTMLElement | null>(null);
 
-    const fpsDisplay = computed(() => {
+    const smpteTimeCode = (currentTime: number) => {
+      const mediaFps = state.metaData.fps[state.mediaIndex];
+      const totalFrames = Math.floor(currentTime * mediaFps);
+      const frames = totalFrames % mediaFps;
+
+      const totalSeconds = Math.floor(totalFrames / mediaFps);
+      const seconds = totalSeconds % 60;
+
+      const totalMinutes = Math.floor(totalSeconds / 60);
+      const minutes = totalMinutes % 60;
+
+      const hours = Math.floor(totalMinutes / 60);
+      return `${hours.toString().padStart(2, "0")}:${minutes
+        .toString()
+        .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}:${frames
+        .toString()
+        .padStart(2, "0")}`;
+    };
+
+    /* const fpsDisplay = computed(() => {
       return `FPS: ${state.fps}`;
     });
     const getFpsAverage = () => {
@@ -135,7 +172,7 @@ export default defineComponent({
         state.fpsRounder.pop();
       }
       state.frameSeek = false;
-    };
+    }; */
 
     const drawCanvas = () => {
       if (canvas.value && ctx.value && mediaEl.value) {
@@ -174,7 +211,6 @@ export default defineComponent({
           cancelAnimationFrame(state.animationFrameId);
         } else {
           state.animationFrameId = requestAnimationFrame(drawCanvas);
-          console.log("requestAnimationFrame이 돌아감", state.animationFrameId);
         }
       }
     };
@@ -236,6 +272,7 @@ export default defineComponent({
 
     const setTime = () => {
       if (mediaEl.value && timerWrapper.value && progressbar.value) {
+        state.timeCode = smpteTimeCode(mediaEl.value.currentTime);
         const minutes = Math.floor(mediaEl.value.currentTime / 60);
         const seconds = Math.floor(mediaEl.value.currentTime - minutes * 60);
         const totalMinutes = Math.floor(mediaEl.value.duration / 60);
@@ -301,7 +338,6 @@ export default defineComponent({
       if (mediaEl.value && state.fileNames.length > 0) {
         mediaEl.value.src = state.fileNames[state.mediaIndex];
       }
-
       if (canvas.value) {
         ctx.value = canvas.value.getContext("2d") as CanvasRenderingContext2D;
       }
@@ -314,7 +350,7 @@ export default defineComponent({
           const computedStyle = getComputedStyle(mediaEl.value);
           canvas.value.width = parseInt(computedStyle.width, 10);
           canvas.value.height = parseInt(computedStyle.height, 10);
-          mediaEl.value.requestVideoFrameCallback(ticker);
+          /* mediaEl.value.requestVideoFrameCallback(ticker); */
           mediaEl.value.play();
           setTime();
           mediaEl.value.addEventListener("timeupdate", () => {
@@ -339,8 +375,9 @@ export default defineComponent({
       changeMedia,
       canvas,
       ctx,
-      fpsDisplay,
-      handleSeek,
+
+      /* fpsDisplay,
+      handleSeek, */
     };
   },
 });
