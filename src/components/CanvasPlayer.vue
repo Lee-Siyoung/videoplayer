@@ -120,20 +120,15 @@ export default defineComponent({
     const smpteTimeCode = (currentTime: number) => {
       const mediaFps = state.metaData.fps[state.mediaIndex];
       const totalFrames = Math.floor(currentTime * mediaFps);
+      const hours = Math.floor(totalFrames / (60 * 60 * mediaFps));
+      const minutes = Math.floor((totalFrames / (60 * mediaFps)) % 60);
+      const seconds = Math.floor((totalFrames / mediaFps) % 60);
       const frames = totalFrames % mediaFps;
-
-      const totalSeconds = Math.floor(totalFrames / mediaFps);
-      const seconds = totalSeconds % 60;
-
-      const totalMinutes = Math.floor(totalSeconds / 60);
-      const minutes = totalMinutes % 60;
-
-      const hours = Math.floor(totalMinutes / 60);
       return `${hours.toString().padStart(2, "0")}:${minutes
         .toString()
         .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}:${frames
         .toString()
-        .padStart(2, "0")}`;
+        .padStart(2, "0")} / ${totalFrames}`;
     };
 
     /* const fpsDisplay = computed(() => {
