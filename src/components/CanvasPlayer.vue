@@ -1,7 +1,7 @@
 <template>
   <div class="player">
     <div class="video-wrapper">
-      <h1>{{ state.timeCode }} / {{ state.metaData.fps[state.mediaIndex] }}</h1>
+      <h1>{{ state.timeCode }}</h1>
       <button @click="changeMedia" aria-label="change media">
         Change Media
       </button>
@@ -48,7 +48,7 @@
 </template>
 
 <script lang="ts">
-import { ref, onMounted, reactive, defineComponent, computed } from "vue";
+import { ref, onMounted, reactive, defineComponent } from "vue";
 
 interface State {
   mediaIndex: number;
@@ -80,6 +80,12 @@ interface MetaData {
   fps: number[];
   audioBitrate: number[];
   audioSample: number[];
+}
+
+declare global {
+  interface Window {
+    webkitAudioContext: typeof AudioContext;
+  }
 }
 
 export default defineComponent({
@@ -128,7 +134,7 @@ export default defineComponent({
         .toString()
         .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}:${frames
         .toString()
-        .padStart(2, "0")} / ${totalFrames}`;
+        .padStart(2, "0")}`;
     };
 
     /* const fpsDisplay = computed(() => {
@@ -370,7 +376,6 @@ export default defineComponent({
       changeMedia,
       canvas,
       ctx,
-
       /* fpsDisplay,
       handleSeek, */
     };
