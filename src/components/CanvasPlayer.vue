@@ -338,7 +338,7 @@ export default defineComponent({
       }
       timerWrapper.value?.addEventListener("mousedown", startDrag);
       timerWrapper.value?.addEventListener("mousemove", duringDrag);
-      document.addEventListener("mouseup", endDrag);
+      timerWrapper.value?.addEventListener("mouseup", endDrag);
 
       mediaEl.value?.addEventListener("loadedmetadata", () => {
         if (canvas.value && mediaEl.value && ctx.value) {
