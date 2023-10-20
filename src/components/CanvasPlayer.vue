@@ -49,7 +49,6 @@ import { ref, onMounted, reactive, defineComponent } from "vue";
 
 interface State {
   mediaIndex: number;
-  fileNames: string[];
   formattedTime: string;
   mediaDuration: string;
   intervalFwd: number;
@@ -63,27 +62,12 @@ interface State {
   frameSeek: boolean;
   fps: number;*/
   timeCode: string;
-  metaData: MetaData;
-  frames: number;
-}
-/* interface VideoMetadata {
-  mediaTime: number;
-  presentedFrames: number;
-} */
-
-interface MetaData {
-  width: number[];
-  height: number[];
-  videoBitrate: number[];
-  fps: number[];
-  audioBitrate: number[];
-  audioSample: number[];
+  IVideo: IVideo[];
 }
 
-declare global {
-  interface Window {
-    webkitAudioContext: typeof AudioContext;
-  }
+interface IVideo {
+  src: string;
+  fps: number;
 }
 
 export default defineComponent({
@@ -91,7 +75,6 @@ export default defineComponent({
   setup() {
     const state = reactive<State>({
       mediaIndex: 0,
-      fileNames: [],
       formattedTime: "00:00",
       mediaDuration: "00:00",
       intervalFwd: 0,
@@ -105,15 +88,20 @@ export default defineComponent({
       frameSeek: true,
       fps: 0, */
       timeCode: "00:00:00:00",
-      metaData: {
-        width: [720, 1080],
-        height: [306, 1918],
-        videoBitrate: [1332, 1082],
-        fps: [24, 23.98],
-        audioBitrate: [149, 0],
-        audioSample: [48, 0],
-      },
-      frames: 0,
+      IVideo: [
+        {
+          src: "",
+          fps: 24,
+        },
+        {
+          src: "",
+          fps: 25,
+        },
+        {
+          src: "",
+          fps: 23.98,
+        },
+      ],
     });
     const canvas = ref<HTMLCanvasElement | null>(null);
     const ctx = ref<CanvasRenderingContext2D | null>(null);
@@ -123,7 +111,7 @@ export default defineComponent({
     const progressbar = ref<HTMLElement | null>(null);
 
     const smpteTimeCode = (currentTime: number) => {
-      const mediaFps = state.metaData.fps[state.mediaIndex];
+      const mediaFps = state.IVideo[state.mediaIndex].fps;
       const totalFrames = Math.floor(currentTime * mediaFps);
       const hours = Math.floor(totalFrames / (60 * 60 * mediaFps));
       const minutes = Math.floor((totalFrames / (60 * mediaFps)) % 60);
@@ -325,10 +313,10 @@ export default defineComponent({
     };
 
     const changeMedia = () => {
-      state.mediaIndex = (state.mediaIndex + 1) % state.fileNames.length;
+      state.mediaIndex = (state.mediaIndex + 1) % state.IVideo.length;
 
       if (mediaEl.value) {
-        mediaEl.value.src = state.fileNames[state.mediaIndex];
+        mediaEl.value.src = state.IVideo[state.mediaIndex].src;
       }
     };
 
@@ -337,9 +325,14 @@ export default defineComponent({
       const filenames = context
         .keys()
         .map((key) => key.replace("./", "../assets/"));
-      state.fileNames = filenames;
-      if (mediaEl.value && state.fileNames.length > 0) {
-        mediaEl.value.src = state.fileNames[state.mediaIndex];
+      let index = 0;
+      console.log(filenames);
+      for (const key in state.IVideo) {
+        state.IVideo[key].src = filenames[index];
+        index++;
+      }
+      if (mediaEl.value) {
+        mediaEl.value.src = state.IVideo[state.mediaIndex].src;
       }
       if (canvas.value) {
         ctx.value = canvas.value.getContext("2d") as CanvasRenderingContext2D;
@@ -493,9 +486,6 @@ button {
 
 .timer {
   line-height: 55px;
-  font-size: 10px;
-  font-family: monospace;
-  text-shadow: 1px 1px 0px black;
   color: #0000000d;
   height: 5vw;
   position: relative;
@@ -512,6 +502,9 @@ button {
 }
 
 .timer span {
+  font-size: 15px;
+  font-family: monospace;
+  text-shadow: 1px 1px 0px black;
   position: absolute;
   z-index: 3;
   left: 19px;
