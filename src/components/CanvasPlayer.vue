@@ -1,7 +1,6 @@
 <template>
   <div class="player">
     <div class="video-wrapper">
-      <h1>{{ state.timeCode }}</h1>
       <button @click="changeMedia" aria-label="change media">
         Change Media
       </button>
@@ -24,12 +23,6 @@
           data-icon="S"
           aria-label="stop"
         ></button>
-        <div class="timer" ref="timerWrapper" @click="seekToTime">
-          <div ref="progressbar"></div>
-          <span aria-label="timer"
-            >{{ state.formattedTime }} / {{ state.mediaDuration }}</span
-          >
-        </div>
         <button
           class="rwd"
           @click="goBackward"
@@ -42,6 +35,10 @@
           data-icon="F"
           aria-label="fast forward"
         ></button>
+      </div>
+      <div class="timer" ref="timerWrapper" @click="seekToTime">
+        <div ref="progressbar"></div>
+        <span aria-label="timer">{{ state.timeCode }}</span>
       </div>
     </div>
   </div>
@@ -67,6 +64,7 @@ interface State {
   fps: number;*/
   timeCode: string;
   metaData: MetaData;
+  frames: number;
 }
 /* interface VideoMetadata {
   mediaTime: number;
@@ -115,6 +113,7 @@ export default defineComponent({
         audioBitrate: [149, 0],
         audioSample: [48, 0],
       },
+      frames: 0,
     });
     const canvas = ref<HTMLCanvasElement | null>(null);
     const ctx = ref<CanvasRenderingContext2D | null>(null);
@@ -129,14 +128,18 @@ export default defineComponent({
       const hours = Math.floor(totalFrames / (60 * 60 * mediaFps));
       const minutes = Math.floor((totalFrames / (60 * mediaFps)) % 60);
       const seconds = Math.floor((totalFrames / mediaFps) % 60);
-      const frames = totalFrames % mediaFps;
+      const frames = Math.floor(totalFrames % mediaFps);
       return `${hours.toString().padStart(2, "0")}:${minutes
         .toString()
         .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}:${frames
         .toString()
         .padStart(2, "0")}`;
     };
-
+    const update = () => {
+      if (mediaEl.value) {
+        state.timeCode = smpteTimeCode(mediaEl.value.currentTime);
+      }
+    };
     /* const fpsDisplay = computed(() => {
       return `FPS: ${state.fps}`;
     });
@@ -273,7 +276,6 @@ export default defineComponent({
 
     const setTime = () => {
       if (mediaEl.value && timerWrapper.value && progressbar.value) {
-        state.timeCode = smpteTimeCode(mediaEl.value.currentTime);
         const minutes = Math.floor(mediaEl.value.currentTime / 60);
         const seconds = Math.floor(mediaEl.value.currentTime - minutes * 60);
         const totalMinutes = Math.floor(mediaEl.value.duration / 60);
@@ -354,6 +356,7 @@ export default defineComponent({
           /* mediaEl.value.requestVideoFrameCallback(ticker); */
           mediaEl.value.play();
           setTime();
+          setInterval(update, 1000 / 24);
           mediaEl.value.addEventListener("timeupdate", () => {
             setTime();
             drawCanvas();
@@ -489,22 +492,22 @@ button {
 }
 
 .timer {
-  line-height: 38px;
+  line-height: 55px;
   font-size: 10px;
   font-family: monospace;
   text-shadow: 1px 1px 0px black;
-  color: white;
-  flex: 5;
+  color: #0000000d;
+  height: 5vw;
   position: relative;
 }
 
 .timer div {
   position: absolute;
-  background-color: rgba(255, 255, 255, 0.2);
+  background-color: rgba(120, 120, 120, 0.233);
   left: 0;
   top: 0;
   width: 0;
-  height: 38px;
+  height: 5vw;
   z-index: 2;
 }
 
