@@ -1,44 +1,25 @@
 <template>
   <div class="player">
+    <div>
+      <li v-for="video in state.IVideo" :key="video.name">{{ video.name }}</li>
+    </div>
     <div class="video-wrapper">
-      <button @click="changeMedia" aria-label="change media">
-        Change Media
-      </button>
+      <button @click="changeMedia">Change Media</button>
       <div class="test">
         <video ref="mediaEl">
           <source src="" type="video/mp4" />
         </video>
         <canvas ref="canvas"></canvas>
       </div>
-      <div class="controls" ref="controls">
-        <button
-          class="play"
-          @click="togglePlay"
-          data-icon="P"
-          aria-label="play pause toggle"
-        ></button>
-        <button
-          class="stop"
-          @click="toggleStop"
-          data-icon="S"
-          aria-label="stop"
-        ></button>
-        <button
-          class="rwd"
-          @click="goBackward"
-          data-icon="B"
-          aria-label="rewind"
-        ></button>
-        <button
-          class="fwd"
-          @click="goForward"
-          data-icon="F"
-          aria-label="fast forward"
-        ></button>
+      <div class="controls" ref="controlEl">
+        <button class="play" @click="togglePlay" data-icon="P"></button>
+        <button class="stop" @click="toggleStop" data-icon="S"></button>
+        <button class="rwd" @click="goBackward" data-icon="B"></button>
+        <button class="fwd" @click="goForward" data-icon="F"></button>
       </div>
       <div class="timer" ref="timerWrapper" @click="seekToTime">
         <div ref="progressbar"></div>
-        <span aria-label="timer">{{ state.timeCode }}</span>
+        <span>{{ state.timeCode }}</span>
       </div>
     </div>
   </div>
@@ -56,17 +37,13 @@ interface State {
   isDragging: boolean;
   animationFrameId: number;
   skipTime: number;
-  /* lastMediaTime: number;
-  lastFrameNum: number;
-  fpsRounder: number[];
-  frameSeek: boolean;
-  fps: number;*/
   timeCode: string;
   IVideo: IVideo[];
 }
 
 interface IVideo {
   src: string;
+  name: string;
   fps: number;
 }
 
@@ -82,23 +59,21 @@ export default defineComponent({
       isDragging: false,
       animationFrameId: 0,
       skipTime: 10,
-      /* lastMediaTime: 0,
-      lastFrameNum: 0,
-      fpsRounder: [],
-      frameSeek: true,
-      fps: 0, */
       timeCode: "00:00:00:00",
       IVideo: [
         {
           src: "",
+          name: "",
           fps: 24,
         },
         {
           src: "",
-          fps: 25,
+          name: "",
+          fps: 23.98,
         },
         {
           src: "",
+          name: "",
           fps: 23.98,
         },
       ],
@@ -106,7 +81,7 @@ export default defineComponent({
     const canvas = ref<HTMLCanvasElement | null>(null);
     const ctx = ref<CanvasRenderingContext2D | null>(null);
     const mediaEl = ref<HTMLVideoElement | null>(null);
-    const controls = ref<HTMLElement | null>(null);
+    const controlEl = ref<HTMLElement | null>(null);
     const timerWrapper = ref<HTMLElement | null>(null);
     const progressbar = ref<HTMLElement | null>(null);
 
@@ -128,43 +103,6 @@ export default defineComponent({
         state.timeCode = smpteTimeCode(mediaEl.value.currentTime);
       }
     };
-    /* const fpsDisplay = computed(() => {
-      return `FPS: ${state.fps}`;
-    });
-    const getFpsAverage = () => {
-      return (
-        state.fpsRounder.reduce((a, b) => a + b, 0) / state.fpsRounder.length
-      );
-    };
-
-    const ticker = (timeupdate: number, metadata: VideoMetadata) => {
-      const mediaTimeDiff = Math.abs(metadata.mediaTime - state.lastMediaTime);
-      const frameNumDiff = Math.abs(
-        metadata.presentedFrames - state.lastFrameNum
-      );
-      const diff = mediaTimeDiff / frameNumDiff;
-      if (
-        diff &&
-        diff < 1 &&
-        state.frameSeek &&
-        state.fpsRounder.length < 50 &&
-        mediaEl.value?.playbackRate === 1 &&
-        document.hasFocus()
-      ) {
-        state.fpsRounder.push(diff);
-        state.fps = Math.round(1 / getFpsAverage());
-      }
-      state.frameSeek = true;
-      state.lastMediaTime = metadata.mediaTime;
-      state.lastFrameNum = metadata.presentedFrames;
-      mediaEl.value?.requestVideoFrameCallback(ticker);
-    };
-    const handleSeek = () => {
-      if (state.fpsRounder.length > 0) {
-        state.fpsRounder.pop();
-      }
-      state.frameSeek = false;
-    }; */
 
     const drawCanvas = () => {
       if (canvas.value && ctx.value && mediaEl.value) {
@@ -324,11 +262,12 @@ export default defineComponent({
       const context = require.context("../assets", false, /\.(mp4|webm)$/);
       const filenames = context
         .keys()
-        .map((key) => key.replace("./", "../assets/"));
+        .map((key) => key.replace("./", "").replace(".mp4", ""));
+      const url = context.keys().map((key) => key.replace("./", "../assets/"));
       let index = 0;
-      console.log(filenames);
       for (const key in state.IVideo) {
-        state.IVideo[key].src = filenames[index];
+        state.IVideo[key].src = url[index];
+        state.IVideo[key].name = filenames[index];
         index++;
       }
       if (mediaEl.value) {
@@ -346,7 +285,6 @@ export default defineComponent({
           const computedStyle = getComputedStyle(mediaEl.value);
           canvas.value.width = parseInt(computedStyle.width, 10);
           canvas.value.height = parseInt(computedStyle.height, 10);
-          /* mediaEl.value.requestVideoFrameCallback(ticker); */
           mediaEl.value.play();
           setTime();
           setInterval(update, 1000 / 24);
@@ -361,7 +299,7 @@ export default defineComponent({
     return {
       state,
       mediaEl,
-      controls,
+      controlEl,
       timerWrapper,
       progressbar,
       goForward,
@@ -372,8 +310,6 @@ export default defineComponent({
       changeMedia,
       canvas,
       ctx,
-      /* fpsDisplay,
-      handleSeek, */
     };
   },
 });
@@ -390,13 +326,8 @@ export default defineComponent({
   font-weight: normal;
   font-style: normal;
 }
-input {
-  margin: 0;
-  padding: 0;
-}
 
 canvas {
-  /* border: 1px solid black; */
   height: 50vh;
   width: 100vh;
 }
@@ -406,16 +337,9 @@ video {
   display: none;
 }
 
-p {
-  position: absolute;
-  top: 310px;
-}
-
 .player {
   display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
+  position: relative;
 }
 
 .video-wrapper {
@@ -485,7 +409,7 @@ button {
 }
 
 .timer {
-  line-height: 55px;
+  line-height: 70px;
   color: #0000000d;
   height: 5vw;
   position: relative;
