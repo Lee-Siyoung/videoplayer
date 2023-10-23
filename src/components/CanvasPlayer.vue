@@ -91,11 +91,8 @@ export default defineComponent({
     const progressbar = ref<HTMLElement | null>(null);
 
     const clickMedia = (index: number) => {
-      if (typeof index !== "undefined") {
-        state.mediaIndex = index;
-      } else {
-        state.mediaIndex = (state.mediaIndex + 1) % state.IVideo.length;
-      }
+      state.mediaIndex = index;
+
       if (mediaEl.value) {
         mediaEl.value.src = state.IVideo[state.mediaIndex].src;
       }
