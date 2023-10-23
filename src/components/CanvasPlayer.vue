@@ -6,19 +6,19 @@
         v-for="(video, index) in state.IVideo"
         :key="video.src"
       >
-        <button class="video-button" @click="clickMedia(index)">
+        <button class="video-button" @click="clickVideo(index)">
           {{ video.name }}
         </button>
       </li>
     </div>
     <div class="video-wrapper">
-      <h1>{{ state.IVideo[state.mediaIndex].name }}</h1>
+      <h1>{{ state.IVideo[state.videoIndex].name }}</h1>
       <button @click="stopAndPlay">
-        <span v-if="state.autoPlay == false">AllPlay</span>
-        <span v-else>AllStop</span>
+        <span v-if="state.autoPlay == false">전체시작</span>
+        <span v-else>전체멈춤</span>
       </button>
       <div class="test">
-        <video ref="mediaEl">
+        <video ref="videoEl">
           <source src="" type="video/mp4" />
         </video>
         <canvas ref="canvas"></canvas>
@@ -32,6 +32,9 @@
       <div class="timer" ref="timerWrapper" @click="seekToTime">
         <div ref="progressbar"></div>
         <span>{{ state.timeCode }}</span>
+        <span class="time"
+          >{{ state.formattedTime }} / {{ state.videoDuration }}</span
+        >
       </div>
     </div>
   </div>
@@ -41,8 +44,10 @@
 import { ref, onMounted, reactive, defineComponent } from "vue";
 
 interface State {
+  formattedTime: string;
+  videoDuration: string;
   autoPlay: boolean;
-  mediaIndex: number;
+  videoIndex: number;
   isDragging: boolean;
   animationFrameId: number;
   interval: number;
@@ -59,8 +64,10 @@ interface IVideo {
 export default defineComponent({
   setup() {
     const state = reactive<State>({
+      formattedTime: "00:00",
+      videoDuration: "00:00",
       autoPlay: true,
-      mediaIndex: 0,
+      videoIndex: 0,
       isDragging: false,
       animationFrameId: 0,
       interval: 10,
@@ -90,18 +97,18 @@ export default defineComponent({
     });
     const canvas = ref<HTMLCanvasElement | null>(null);
     const ctx = ref<CanvasRenderingContext2D | null>(null);
-    const mediaEl = ref<HTMLVideoElement | null>(null);
+    const videoEl = ref<HTMLVideoElement | null>(null);
     const controlEl = ref<HTMLElement | null>(null);
     const timerWrapper = ref<HTMLElement | null>(null);
     const progressbar = ref<HTMLElement | null>(null);
 
     const smpteTimeCode = (currentTime: number) => {
-      const mediaFps = state.IVideo[state.mediaIndex].fps;
-      const totalFrames = Math.floor(currentTime * mediaFps);
-      const hours = Math.floor(totalFrames / (60 * 60 * mediaFps));
-      const minutes = Math.floor((totalFrames / (60 * mediaFps)) % 60);
-      const seconds = Math.floor((totalFrames / mediaFps) % 60);
-      const frames = Math.floor(totalFrames % mediaFps);
+      const videoFps = state.IVideo[state.videoIndex].fps;
+      const totalFrames = Math.floor(currentTime * videoFps);
+      const hours = Math.floor(totalFrames / (60 * 60 * videoFps));
+      const minutes = Math.floor((totalFrames / (60 * videoFps)) % 60);
+      const seconds = Math.floor((totalFrames / videoFps) % 60);
+      const frames = Math.floor(totalFrames % videoFps);
       return `${hours.toString().padStart(2, "0")}:${minutes
         .toString()
         .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}:${frames
@@ -109,15 +116,15 @@ export default defineComponent({
         .padStart(2, "0")}`;
     };
     const update = () => {
-      if (mediaEl.value) {
-        state.timeCode = smpteTimeCode(mediaEl.value.currentTime);
+      if (videoEl.value) {
+        state.timeCode = smpteTimeCode(videoEl.value.currentTime);
       }
     };
 
     const drawCanvas = () => {
-      if (canvas.value && ctx.value && mediaEl.value) {
+      if (canvas.value && ctx.value && videoEl.value) {
         const videoAspectRatio =
-          mediaEl.value.videoWidth / mediaEl.value.videoHeight;
+          videoEl.value.videoWidth / videoEl.value.videoHeight;
         const canvasAspectRatio = canvas.value.width / canvas.value.height;
         const { drawWidth, drawHeight, xStart, yStart } = (() => {
           if (videoAspectRatio < canvasAspectRatio) {
@@ -141,13 +148,13 @@ export default defineComponent({
           }
         })();
         ctx.value.drawImage(
-          mediaEl.value,
+          videoEl.value,
           xStart,
           yStart,
           drawWidth,
           drawHeight
         );
-        if (mediaEl.value.paused) {
+        if (videoEl.value.paused) {
           cancelAnimationFrame(state.animationFrameId);
         } else {
           state.animationFrameId = requestAnimationFrame(drawCanvas);
@@ -156,65 +163,82 @@ export default defineComponent({
     };
 
     const togglePlay = () => {
-      if (mediaEl.value) {
-        if (mediaEl.value.paused) {
-          mediaEl.value.play();
+      if (videoEl.value) {
+        if (videoEl.value.paused) {
+          videoEl.value.play();
           drawCanvas();
         } else {
-          mediaEl.value.pause();
+          videoEl.value.pause();
         }
       }
     };
 
     const toggleStop = () => {
-      if (mediaEl.value) {
-        mediaEl.value.pause();
-        mediaEl.value.currentTime = 0;
+      if (videoEl.value) {
+        videoEl.value.pause();
+        videoEl.value.currentTime = 0;
       }
     };
 
     const goBackward = () => {
-      if (mediaEl.value) {
-        if (mediaEl.value.currentTime <= state.interval) {
-          mediaEl.value.currentTime = 0;
+      if (videoEl.value) {
+        if (videoEl.value.currentTime <= state.interval) {
+          videoEl.value.currentTime = 0;
           toggleStop();
         } else {
-          mediaEl.value.currentTime -= state.interval;
+          videoEl.value.currentTime -= state.interval;
         }
         drawCanvas();
       }
     };
 
     const goForward = () => {
-      if (mediaEl.value) {
+      if (videoEl.value) {
         if (
-          mediaEl.value.currentTime >=
-          mediaEl.value.duration - state.interval
+          videoEl.value.currentTime >=
+          videoEl.value.duration - state.interval
         ) {
-          mediaEl.value.currentTime = mediaEl.value.duration;
+          videoEl.value.currentTime = videoEl.value.duration;
         } else {
-          mediaEl.value.currentTime += state.interval;
+          videoEl.value.currentTime += state.interval;
         }
         drawCanvas();
       }
     };
 
     const setTime = () => {
-      if (mediaEl.value && timerWrapper.value && progressbar.value) {
+      if (videoEl.value && timerWrapper.value && progressbar.value) {
+        state.timeCode = smpteTimeCode(videoEl.value.currentTime);
+        const minutes = Math.floor(videoEl.value.currentTime / 60);
+        const seconds = Math.floor(videoEl.value.currentTime - minutes * 60);
+        const totalMinutes = Math.floor(videoEl.value.duration / 60);
+        const totalSeconds = Math.floor(videoEl.value.duration % 60);
+
+        const minuteValue = minutes.toString().padStart(2, "0");
+        const secondValue = seconds.toString().padStart(2, "0");
+        const totalMinuteValue = totalMinutes.toString().padStart(2, "0");
+        const totalSecondValue = totalSeconds.toString().padStart(2, "0");
+
+        const videoTime = `${minuteValue}:${secondValue}`;
+        state.formattedTime = videoTime;
+
+        const videoDuration = `${totalMinuteValue}:${totalSecondValue}`;
+        state.videoDuration = videoDuration;
+
         const barLength =
-          (mediaEl.value.currentTime / mediaEl.value.duration) *
+          (videoEl.value.currentTime / videoEl.value.duration) *
             timerWrapper.value.clientWidth || 0;
         progressbar.value.style.width = barLength + "px";
       }
     };
 
     const seekToTime = (event: MouseEvent) => {
-      if (mediaEl.value && timerWrapper.value) {
+      if (videoEl.value && timerWrapper.value) {
         const barRect = timerWrapper.value.getBoundingClientRect();
         const clickX = event.clientX - barRect.left;
         const barWidth = barRect.width;
-        const newTime = (clickX / barWidth) * mediaEl.value.duration;
-        mediaEl.value.currentTime = newTime;
+        const newTime = (clickX / barWidth) * videoEl.value.duration;
+        videoEl.value.currentTime = newTime;
         drawCanvas();
       }
     };
@@ -233,10 +257,10 @@ export default defineComponent({
       state.isDragging = false;
     };
 
-    const clickMedia = (index: number) => {
-      state.mediaIndex = index;
-      if (mediaEl.value) {
-        mediaEl.value.src = state.IVideo[state.mediaIndex].src;
+    const clickVideo = (index: number) => {
+      state.videoIndex = index;
+      if (videoEl.value) {
+        videoEl.value.src = state.IVideo[state.videoIndex].src;
       }
       if (state.autoPlay === false) {
         state.autoPlay = true;
@@ -247,7 +271,7 @@ export default defineComponent({
 
     const stopAndPlay = () => {
       if (state.autoPlay === false) {
-        mediaEl.value?.play();
+        videoEl.value?.play();
         state.autoPlay = true;
       } else if (state.autoPlay === true) {
         toggleStop();
@@ -267,8 +291,8 @@ export default defineComponent({
         state.IVideo[key].name = filenames[index];
         index++;
       }
-      if (mediaEl.value) {
-        mediaEl.value.src = state.IVideo[state.mediaIndex].src;
+      if (videoEl.value) {
+        videoEl.value.src = state.IVideo[state.videoIndex].src;
       }
       if (canvas.value) {
         ctx.value = canvas.value.getContext("2d") as CanvasRenderingContext2D;
@@ -277,15 +301,15 @@ export default defineComponent({
       timerWrapper.value?.addEventListener("mousemove", duringDrag);
       timerWrapper.value?.addEventListener("mouseup", endDrag);
 
-      mediaEl.value?.addEventListener("loadedmetadata", () => {
-        if (canvas.value && mediaEl.value && ctx.value) {
-          const computedStyle = getComputedStyle(mediaEl.value);
+      videoEl.value?.addEventListener("loadedmetadata", () => {
+        if (canvas.value && videoEl.value && ctx.value) {
+          const computedStyle = getComputedStyle(videoEl.value);
           canvas.value.width = parseInt(computedStyle.width, 10);
           canvas.value.height = parseInt(computedStyle.height, 10);
           stopAndPlay();
           setTime();
           setInterval(update, 1000 / 24);
-          mediaEl.value.addEventListener("timeupdate", () => {
+          videoEl.value.addEventListener("timeupdate", () => {
             setTime();
             drawCanvas();
           });
@@ -295,7 +319,7 @@ export default defineComponent({
 
     return {
       state,
-      mediaEl,
+      videoEl,
       controlEl,
       timerWrapper,
       progressbar,
@@ -306,7 +330,7 @@ export default defineComponent({
       seekToTime,
       canvas,
       ctx,
-      clickMedia,
+      clickVideo,
       stopAndPlay,
     };
   },
@@ -323,6 +347,9 @@ export default defineComponent({
     url("../assets/fonts/heydings_controls-webfont.ttf") format("truetype");
   font-weight: normal;
   font-style: normal;
+}
+.time {
+  bottom: 0px;
 }
 .videoList {
   text-align: left;
@@ -408,7 +435,7 @@ video {
 }
 
 .timer {
-  line-height: 70px;
+  line-height: 100px;
   color: #0000000d;
   height: 5vw;
   position: relative;
