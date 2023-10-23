@@ -1,10 +1,15 @@
 <template>
   <div class="player">
     <div>
-      <li v-for="video in state.IVideo" :key="video.name">{{ video.name }}</li>
+      <li v-for="(video, index) in state.IVideo" :key="video.src">
+        <button class="video-button" @click="clickMedia(index)">
+          {{ video.name }}
+        </button>
+      </li>
     </div>
     <div class="video-wrapper">
-      <button @click="changeMedia">Change Media</button>
+      <!-- <button @click="changeMedia">Change Media</button> -->
+      <h1>{{ state.IVideo[state.mediaIndex].name }}</h1>
       <div class="test">
         <video ref="mediaEl">
           <source src="" type="video/mp4" />
@@ -84,6 +89,17 @@ export default defineComponent({
     const controlEl = ref<HTMLElement | null>(null);
     const timerWrapper = ref<HTMLElement | null>(null);
     const progressbar = ref<HTMLElement | null>(null);
+
+    const clickMedia = (index: number) => {
+      if (typeof index !== "undefined") {
+        state.mediaIndex = index;
+      } else {
+        state.mediaIndex = (state.mediaIndex + 1) % state.IVideo.length;
+      }
+      if (mediaEl.value) {
+        mediaEl.value.src = state.IVideo[state.mediaIndex].src;
+      }
+    };
 
     const smpteTimeCode = (currentTime: number) => {
       const mediaFps = state.IVideo[state.mediaIndex].fps;
@@ -250,13 +266,13 @@ export default defineComponent({
       state.isDragging = false;
     };
 
-    const changeMedia = () => {
+    /* const changeMedia = () => {
       state.mediaIndex = (state.mediaIndex + 1) % state.IVideo.length;
 
       if (mediaEl.value) {
         mediaEl.value.src = state.IVideo[state.mediaIndex].src;
       }
-    };
+    }; */
 
     onMounted(() => {
       const context = require.context("../assets", false, /\.(mp4|webm)$/);
@@ -307,9 +323,10 @@ export default defineComponent({
       togglePlay,
       toggleStop,
       seekToTime,
-      changeMedia,
+      /* changeMedia, */
       canvas,
       ctx,
+      clickMedia,
     };
   },
 });
@@ -344,6 +361,7 @@ video {
 
 .video-wrapper {
   position: relative;
+  left: 10vw;
 }
 
 .controls {
@@ -361,8 +379,7 @@ video {
   transform: translateX(-50%);
 }
 
-button,
-.controls {
+.controls > button {
   background: linear-gradient(to bottom, #222, #666);
 }
 
@@ -371,7 +388,7 @@ button,
   opacity: 1;
 }
 
-button:before {
+.controls > :before {
   font-family: HeydingsControlsRegular;
   font-size: 20px;
   position: relative;
@@ -384,7 +401,7 @@ button:before {
   font-size: 22px;
 }
 
-button,
+.controls > button,
 .timer {
   height: 38px;
   line-height: 19px;
@@ -392,12 +409,10 @@ button,
   border-right: 1px solid #333;
 }
 
-button {
+.controls > button {
   position: relative;
   border: 0;
   flex: 1;
-  outline: none;
-  color: aqua;
 }
 
 .play {
@@ -434,12 +449,12 @@ button {
   left: 19px;
 }
 
-button:hover,
-button:focus {
+.controls > button:hover,
+.controls > button:focus {
   box-shadow: inset 1px 1px 2px black;
 }
 
-button:active {
+.controls > button:active {
   box-shadow: inset 3px 3px 2px black;
 }
 </style>
