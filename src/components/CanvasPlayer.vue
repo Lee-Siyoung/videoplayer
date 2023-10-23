@@ -6,17 +6,18 @@
         v-for="(video, index) in state.IVideo"
         :key="video.src"
       >
-        <button class="video-button" @click="clickVideo(index)">
+        <button
+          class="video-button"
+          @click="clickVideo(index)"
+          :class="{ active: state.videoIndex === index }"
+          :disabled="state.videoIndex === index"
+        >
           {{ video.name }}
         </button>
       </li>
     </div>
     <div class="video-wrapper">
       <h1>{{ state.IVideo[state.videoIndex].name }}</h1>
-      <button @click="stopAndPlay">
-        <span v-if="state.autoPlay == false">전체시작</span>
-        <span v-else>전체멈춤</span>
-      </button>
       <div class="test">
         <video ref="videoEl">
           <source src="" type="video/mp4" />
@@ -36,6 +37,26 @@
           >{{ state.formattedTime }} / {{ state.videoDuration }}</span
         >
       </div>
+    </div>
+    <div class="radio-buttons">
+      <input
+        type="radio"
+        id="play"
+        name="videoControl"
+        value="true"
+        @change="state.autoPlay = true"
+      />
+      <label for="play">전체시작</label>
+
+      <input
+        type="radio"
+        id="stop"
+        name="videoControl"
+        value="false"
+        @change="state.autoPlay = false"
+        checked
+      />
+      <label for="stop">전체멈춤</label>
     </div>
   </div>
 </template>
@@ -66,7 +87,7 @@ export default defineComponent({
     const state = reactive<State>({
       formattedTime: "00:00",
       videoDuration: "00:00",
-      autoPlay: true,
+      autoPlay: false,
       videoIndex: 0,
       isDragging: false,
       animationFrameId: 0,
@@ -262,21 +283,6 @@ export default defineComponent({
       if (videoEl.value) {
         videoEl.value.src = state.IVideo[state.videoIndex].src;
       }
-      if (state.autoPlay === false) {
-        state.autoPlay = true;
-      } else {
-        state.autoPlay = false;
-      }
-    };
-
-    const stopAndPlay = () => {
-      if (state.autoPlay === false) {
-        videoEl.value?.play();
-        state.autoPlay = true;
-      } else if (state.autoPlay === true) {
-        toggleStop();
-        state.autoPlay = false;
-      }
     };
 
     onMounted(() => {
@@ -300,14 +306,17 @@ export default defineComponent({
       timerWrapper.value?.addEventListener("mousedown", startDrag);
       timerWrapper.value?.addEventListener("mousemove", duringDrag);
       timerWrapper.value?.addEventListener("mouseup", endDrag);
-
       videoEl.value?.addEventListener("loadedmetadata", () => {
         if (canvas.value && videoEl.value && ctx.value) {
           const computedStyle = getComputedStyle(videoEl.value);
           canvas.value.width = parseInt(computedStyle.width, 10);
           canvas.value.height = parseInt(computedStyle.height, 10);
-          stopAndPlay();
           setTime();
+          if (state.autoPlay) {
+            togglePlay();
+          } else {
+            toggleStop();
+          }
           setInterval(update, 1000 / 24);
           videoEl.value.addEventListener("timeupdate", () => {
             setTime();
@@ -331,7 +340,6 @@ export default defineComponent({
       canvas,
       ctx,
       clickVideo,
-      stopAndPlay,
     };
   },
 });
@@ -348,11 +356,32 @@ export default defineComponent({
   font-weight: normal;
   font-style: normal;
 }
+.video-button {
+  background-color: lightgray;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+.active {
+  background-color: blue;
+  color: white;
+}
+.video-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.radio-buttons {
+  flex: 3;
+}
 .time {
   bottom: 0px;
 }
 .videoList {
   text-align: left;
+  list-style: none;
+  margin: 10px;
 }
 
 canvas {
