@@ -13,6 +13,7 @@
     </div>
     <div class="video-wrapper">
       <h1>{{ state.IVideo[state.mediaIndex].name }}</h1>
+      <button @click="stopAndPlay">stopAndPlay</button>
       <div class="test">
         <video ref="mediaEl">
           <source src="" type="video/mp4" />
@@ -37,6 +38,8 @@
 import { ref, onMounted, reactive, defineComponent } from "vue";
 
 interface State {
+  autoCheck: boolean;
+  autoPlay: boolean;
   mediaIndex: number;
   isDragging: boolean;
   animationFrameId: number;
@@ -54,6 +57,8 @@ interface IVideo {
 export default defineComponent({
   setup() {
     const state = reactive<State>({
+      autoCheck: false,
+      autoPlay: true,
       mediaIndex: 0,
       isDragging: false,
       animationFrameId: 0,
@@ -75,6 +80,11 @@ export default defineComponent({
           name: "",
           fps: 23.98,
         },
+        {
+          src: "",
+          name: "",
+          fps: 29.97,
+        },
       ],
     });
     const canvas = ref<HTMLCanvasElement | null>(null);
@@ -83,14 +93,6 @@ export default defineComponent({
     const controlEl = ref<HTMLElement | null>(null);
     const timerWrapper = ref<HTMLElement | null>(null);
     const progressbar = ref<HTMLElement | null>(null);
-
-    const clickMedia = (index: number) => {
-      state.mediaIndex = index;
-
-      if (mediaEl.value) {
-        mediaEl.value.src = state.IVideo[state.mediaIndex].src;
-      }
-    };
 
     const smpteTimeCode = (currentTime: number) => {
       const mediaFps = state.IVideo[state.mediaIndex].fps;
@@ -230,6 +232,28 @@ export default defineComponent({
       state.isDragging = false;
     };
 
+    const clickMedia = (index: number) => {
+      state.mediaIndex = index;
+      if (mediaEl.value) {
+        mediaEl.value.src = state.IVideo[state.mediaIndex].src;
+      }
+      if (state.autoPlay === false) {
+        state.autoPlay = true;
+      } else {
+        state.autoPlay = false;
+      }
+    };
+
+    const stopAndPlay = () => {
+      if (state.autoPlay === false) {
+        mediaEl.value?.play();
+        state.autoPlay = true;
+      } else if (state.autoPlay === true) {
+        toggleStop();
+        state.autoPlay = false;
+      }
+    };
+
     onMounted(() => {
       const context = require.context("../assets", false, /\.(mp4|webm)$/);
       const filenames = context
@@ -257,7 +281,7 @@ export default defineComponent({
           const computedStyle = getComputedStyle(mediaEl.value);
           canvas.value.width = parseInt(computedStyle.width, 10);
           canvas.value.height = parseInt(computedStyle.height, 10);
-          mediaEl.value.play();
+          stopAndPlay();
           setTime();
           setInterval(update, 1000 / 24);
           mediaEl.value.addEventListener("timeupdate", () => {
@@ -282,6 +306,7 @@ export default defineComponent({
       canvas,
       ctx,
       clickMedia,
+      stopAndPlay,
     };
   },
 });
