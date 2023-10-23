@@ -1,7 +1,11 @@
 <template>
   <div class="player">
     <div>
-      <li v-for="(video, index) in state.IVideo" :key="video.src">
+      <li
+        class="videoList"
+        v-for="(video, index) in state.IVideo"
+        :key="video.src"
+      >
         <button class="video-button" @click="clickMedia(index)">
           {{ video.name }}
         </button>
@@ -293,6 +297,9 @@ export default defineComponent({
     url("../assets/fonts/heydings_controls-webfont.ttf") format("truetype");
   font-weight: normal;
   font-style: normal;
+}
+.videoList {
+  text-align: left;
 }
 
 canvas {
