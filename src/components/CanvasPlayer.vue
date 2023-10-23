@@ -39,6 +39,7 @@
       </div>
     </div>
     <div class="radio-buttons">
+      시작 설정 :
       <input
         type="radio"
         id="play"
@@ -46,7 +47,7 @@
         value="true"
         @change="state.autoPlay = true"
       />
-      <label for="play">전체시작</label>
+      <label for="play">시작</label>
 
       <input
         type="radio"
@@ -56,7 +57,7 @@
         @change="state.autoPlay = false"
         checked
       />
-      <label for="stop">전체멈춤</label>
+      <label for="stop">멈춤</label>
     </div>
   </div>
 </template>
@@ -361,14 +362,20 @@ export default defineComponent({
   padding: 10px 20px;
   border: none;
   border-radius: 5px;
-  cursor: pointer;
 }
-.active {
+.video-button:hover {
+  background-color: rgb(177, 177, 177);
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+}
+.active,
+.active:hover {
   background-color: blue;
   color: white;
 }
+
 .video-button:disabled {
-  cursor: not-allowed;
   opacity: 0.7;
 }
 
