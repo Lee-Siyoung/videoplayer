@@ -13,7 +13,10 @@
     </div>
     <div class="video-wrapper">
       <h1>{{ state.IVideo[state.mediaIndex].name }}</h1>
-      <button @click="stopAndPlay">stopAndPlay</button>
+      <button @click="stopAndPlay">
+        <span v-if="state.autoPlay == false">AllPlay</span>
+        <span v-else>AllStop</span>
+      </button>
       <div class="test">
         <video ref="mediaEl">
           <source src="" type="video/mp4" />
@@ -38,7 +41,6 @@
 import { ref, onMounted, reactive, defineComponent } from "vue";
 
 interface State {
-  autoCheck: boolean;
   autoPlay: boolean;
   mediaIndex: number;
   isDragging: boolean;
@@ -57,7 +59,6 @@ interface IVideo {
 export default defineComponent({
   setup() {
     const state = reactive<State>({
-      autoCheck: false,
       autoPlay: true,
       mediaIndex: 0,
       isDragging: false,
