@@ -8,7 +8,6 @@
       </li>
     </div>
     <div class="video-wrapper">
-      <!-- <button @click="changeMedia">Change Media</button> -->
       <h1>{{ state.IVideo[state.mediaIndex].name }}</h1>
       <div class="test">
         <video ref="mediaEl">
@@ -227,14 +226,6 @@ export default defineComponent({
       state.isDragging = false;
     };
 
-    /* const changeMedia = () => {
-      state.mediaIndex = (state.mediaIndex + 1) % state.IVideo.length;
-
-      if (mediaEl.value) {
-        mediaEl.value.src = state.IVideo[state.mediaIndex].src;
-      }
-    }; */
-
     onMounted(() => {
       const context = require.context("../assets", false, /\.(mp4|webm)$/);
       const filenames = context
@@ -284,7 +275,6 @@ export default defineComponent({
       togglePlay,
       toggleStop,
       seekToTime,
-      /* changeMedia, */
       canvas,
       ctx,
       clickMedia,
