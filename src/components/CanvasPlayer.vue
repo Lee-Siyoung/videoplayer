@@ -35,13 +35,9 @@ import { ref, onMounted, reactive, defineComponent } from "vue";
 
 interface State {
   mediaIndex: number;
-  formattedTime: string;
-  mediaDuration: string;
-  intervalFwd: number;
-  intervalRwd: number;
   isDragging: boolean;
   animationFrameId: number;
-  skipTime: number;
+  interval: number;
   timeCode: string;
   IVideo: IVideo[];
 }
@@ -53,17 +49,12 @@ interface IVideo {
 }
 
 export default defineComponent({
-  components: {},
   setup() {
     const state = reactive<State>({
       mediaIndex: 0,
-      formattedTime: "00:00",
-      mediaDuration: "00:00",
-      intervalFwd: 0,
-      intervalRwd: 0,
       isDragging: false,
       animationFrameId: 0,
-      skipTime: 10,
+      interval: 10,
       timeCode: "00:00:00:00",
       IVideo: [
         {
@@ -74,7 +65,7 @@ export default defineComponent({
         {
           src: "",
           name: "",
-          fps: 23.98,
+          fps: 25,
         },
         {
           src: "",
@@ -160,7 +151,6 @@ export default defineComponent({
 
     const togglePlay = () => {
       if (mediaEl.value) {
-        clearIntervalRwdFwd();
         if (mediaEl.value.paused) {
           mediaEl.value.play();
           drawCanvas();
@@ -172,28 +162,18 @@ export default defineComponent({
 
     const toggleStop = () => {
       if (mediaEl.value) {
-        clearIntervalRwdFwd();
         mediaEl.value.pause();
         mediaEl.value.currentTime = 0;
       }
     };
 
-    const clearIntervalRwdFwd = () => {
-      if (state.intervalRwd) {
-        clearInterval(state.intervalRwd);
-      }
-      if (state.intervalFwd) {
-        clearInterval(state.intervalFwd);
-      }
-    };
-
     const goBackward = () => {
       if (mediaEl.value) {
-        if (mediaEl.value.currentTime <= state.skipTime) {
+        if (mediaEl.value.currentTime <= state.interval) {
           mediaEl.value.currentTime = 0;
           toggleStop();
         } else {
-          mediaEl.value.currentTime -= state.skipTime;
+          mediaEl.value.currentTime -= state.interval;
         }
         drawCanvas();
       }
@@ -203,11 +183,11 @@ export default defineComponent({
       if (mediaEl.value) {
         if (
           mediaEl.value.currentTime >=
-          mediaEl.value.duration - state.skipTime
+          mediaEl.value.duration - state.interval
         ) {
           mediaEl.value.currentTime = mediaEl.value.duration;
         } else {
-          mediaEl.value.currentTime += state.skipTime;
+          mediaEl.value.currentTime += state.interval;
         }
         drawCanvas();
       }
@@ -215,22 +195,6 @@ export default defineComponent({
 
     const setTime = () => {
       if (mediaEl.value && timerWrapper.value && progressbar.value) {
-        const minutes = Math.floor(mediaEl.value.currentTime / 60);
-        const seconds = Math.floor(mediaEl.value.currentTime - minutes * 60);
-        const totalMinutes = Math.floor(mediaEl.value.duration / 60);
-        const totalSeconds = Math.floor(mediaEl.value.duration % 60);
-
-        const minuteValue = minutes.toString().padStart(2, "0");
-        const secondValue = seconds.toString().padStart(2, "0");
-        const totalMinuteValue = totalMinutes.toString().padStart(2, "0");
-        const totalSecondValue = totalSeconds.toString().padStart(2, "0");
-
-        const mediaTime = `${minuteValue}:${secondValue}`;
-        state.formattedTime = mediaTime;
-
-        const mediaDuration = `${totalMinuteValue}:${totalSecondValue}`;
-        state.mediaDuration = mediaDuration;
-
         const barLength =
           (mediaEl.value.currentTime / mediaEl.value.duration) *
             timerWrapper.value.clientWidth || 0;
