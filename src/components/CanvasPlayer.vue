@@ -18,6 +18,7 @@
         </a>
       </li>
     </div>
+    <div class="border"></div>
     <div class="video-wrapper">
       <h1>{{ state.IVideo[state.videoIndex].name }}</h1>
       <div class="test">
@@ -298,9 +299,12 @@ export default defineComponent({
         .map((key) => key.replace("./", "").replace(".mp4", ""));
       const url = context.keys().map((key) => key.replace("./", "../assets/"));
       let index = 0;
+      const reg = /[-_/\\^$*+?.()|[\]{}]/g;
       for (const key in state.IVideo) {
         state.IVideo[key].src = url[index];
-        state.IVideo[key].name = filenames[index];
+        state.IVideo[key].name = filenames[index]
+          .replace(reg, " ")
+          .toUpperCase();
         index++;
       }
       if (videoEl.value) {
@@ -366,8 +370,12 @@ export default defineComponent({
 .player {
   display: flex;
   position: relative;
+  height: 100vh;
+  background: #27282c;
 }
-
+h1 {
+  color: #fff;
+}
 .videoList {
   flex-direction: column;
   gap: 50px;
@@ -461,13 +469,14 @@ export default defineComponent({
   margin-left: 40px;
 }
 .radio-buttons p {
-  color: #000;
+  color: #fff;
   font-size: 2em;
   margin-bottom: 10px;
 }
 .radio-buttons label {
   cursor: pointer;
   font-size: 1.5em;
+  color: #fff;
 }
 .radio-buttons label input {
   appearance: none;
@@ -488,8 +497,8 @@ export default defineComponent({
   left: 0;
   width: 100%;
   height: 3px;
-  background: #000;
-  box-shadow: 0 -27px 0 #000;
+  background: #fff;
+  box-shadow: 0 -27px 0 #fff;
   transition: 0.5s;
 }
 .radio-buttons label input:checked ~ span.check::before {
@@ -503,8 +512,8 @@ export default defineComponent({
   left: 0;
   width: 3px;
   height: 100%;
-  background: #000;
-  box-shadow: 27px 0 0 #000;
+  background: #fff;
+  box-shadow: 27px 0 0 #fff;
   transition: 0.5s;
 }
 .radio-buttons label input:checked ~ span.check::after {
@@ -539,12 +548,27 @@ video {
   position: relative;
   left: 5vw;
 }
+.border {
+  position: absolute;
+  left: 20vw;
+  top: 1vw;
+  border: 1px solid rgb(121, 121, 121);
+  width: 55vw;
+  height: 45vw;
+}
+
+/* .border::after {
+  content: "";
+  position: absolute;
+  border: 1px solid red;
+  width: 55vw;
+} */
 
 .controls {
   width: 400px;
   border-radius: 10px;
-  position: absolute;
-  bottom: -50px;
+  position: relative;
+  bottom: -10vw;
   left: 50%;
   background-color: black;
   box-shadow: 3px 3px 5px black;
@@ -554,11 +578,11 @@ video {
   transform: translateX(-50%);
 }
 
-.controls > button {
+.controls button {
   background: linear-gradient(to bottom, #222, #666);
 }
 
-.controls > :before {
+.controls :before {
   font-family: HeydingsControlsRegular;
   font-size: 20px;
   position: relative;
@@ -571,15 +595,21 @@ video {
   font-size: 22px;
 }
 
-.controls > button,
-.timer {
+.controls button {
   height: 38px;
   line-height: 19px;
   box-shadow: inset 0 -5px 25px rgba(0, 0, 0, 0.3);
   border-right: 1px solid #333;
 }
+.timer {
+  height: 38px;
+  line-height: 19px;
+  background: #8a8787;
+  box-shadow: inset 0 -5px 25px #fff;
+  border-right: 1px solid #333;
+}
 
-.controls > button {
+.controls button {
   position: relative;
   border: 0;
   flex: 1;
@@ -595,14 +625,14 @@ video {
 
 .timer {
   line-height: 100px;
-  color: #0000000d;
+  color: #fff;
   height: 5vw;
   position: relative;
 }
 
 .timer div {
   position: absolute;
-  background-color: rgba(120, 120, 120, 0.233);
+  background-color: rgba(255, 255, 255, 0.233);
   left: 0;
   top: 0;
   width: 0;
