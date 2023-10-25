@@ -41,25 +41,28 @@
       </div>
     </div>
     <div class="radio-buttons">
-      시작 설정 :
-      <input
-        type="radio"
-        id="play"
-        name="videoControl"
-        value="true"
-        @change="state.autoPlay = true"
-      />
-      <label for="play">시작</label>
-
-      <input
-        type="radio"
-        id="stop"
-        name="videoControl"
-        value="false"
-        @change="state.autoPlay = false"
-        checked
-      />
-      <label for="stop">멈춤</label>
+      <p>시작 설정</p>
+      <label>
+        <input
+          type="radio"
+          id="play"
+          name="videoControl"
+          value="true"
+          @change="state.autoPlay = true"
+        />
+        <span class="check"></span>시작
+      </label>
+      <label>
+        <input
+          type="radio"
+          id="stop"
+          name="videoControl"
+          value="false"
+          @change="state.autoPlay = false"
+          checked
+        />
+        <span class="check"></span>멈춤</label
+      >
     </div>
   </div>
 </template>
@@ -452,9 +455,68 @@ export default defineComponent({
   width: 20px;
   left: 80%;
 }
+
 .radio-buttons {
   flex: 3;
+  flex-direction: column;
+  margin-left: 40px;
 }
+.radio-buttons p {
+  color: #000;
+  font-size: 2em;
+  margin-bottom: 10px;
+}
+.radio-buttons label {
+  cursor: pointer;
+  font-size: 1.5em;
+}
+.radio-buttons label input {
+  appearance: none;
+  display: none;
+}
+.radio-buttons label span {
+  position: relative;
+  display: inline-block;
+  width: 30px;
+  height: 30px;
+  margin-right: 15px;
+  transition: 0.5s;
+}
+.radio-buttons label span::before {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: #000;
+  box-shadow: 0 -27px 0 #000;
+  transition: 0.5s;
+}
+.radio-buttons label input:checked ~ span.check::before {
+  background: #0f0;
+  box-shadow: 0 0 0 transparent;
+}
+.radio-buttons label span::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 3px;
+  height: 100%;
+  background: #000;
+  box-shadow: 27px 0 0 #000;
+  transition: 0.5s;
+}
+.radio-buttons label input:checked ~ span.check::after {
+  height: 50%;
+  background: #0f0;
+  box-shadow: 0 0 0 transparent;
+}
+.radio-buttons label input:checked ~ span.check {
+  transform: rotate(-45deg) translate(7px, -7px);
+}
+
 .time {
   bottom: 0px;
 }
