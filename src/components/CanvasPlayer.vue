@@ -444,7 +444,14 @@ export default defineComponent({
   letter-spacing: 0.25em;
   pointer-events: none;
 }
-
+.active i::before {
+  width: 20px;
+  left: 20%;
+}
+.active i::after {
+  width: 20px;
+  left: 80%;
+}
 .radio-buttons {
   flex: 3;
 }
