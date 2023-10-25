@@ -557,13 +557,6 @@ video {
   height: 45vw;
 }
 
-/* .border::after {
-  content: "";
-  position: absolute;
-  border: 1px solid red;
-  width: 55vw;
-} */
-
 .controls {
   width: 400px;
   border-radius: 10px;
