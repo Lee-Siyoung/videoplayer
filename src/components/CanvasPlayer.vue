@@ -6,14 +6,16 @@
         v-for="(video, index) in state.IVideo"
         :key="video.src"
       >
-        <button
+        <a
           class="video-button"
           @click="clickVideo(index)"
           :class="{ active: state.videoIndex === index }"
-          :disabled="state.videoIndex === index"
         >
-          {{ video.name }}
-        </button>
+          <span>
+            {{ video.name }}
+          </span>
+          <i></i>
+        </a>
       </li>
     </div>
     <div class="video-wrapper">
@@ -357,26 +359,90 @@ export default defineComponent({
   font-weight: normal;
   font-style: normal;
 }
-.video-button {
-  background-color: lightgray;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 5px;
-}
-.video-button:hover {
-  background-color: rgb(177, 177, 177);
-  padding: 10px 20px;
-  border: none;
-  border-radius: 5px;
-}
-.active,
-.active:hover {
-  background-color: blue;
-  color: white;
+
+.player {
+  display: flex;
+  position: relative;
+  flex-wrap: wrap;
 }
 
-.video-button:disabled {
-  opacity: 0.7;
+.videoList {
+  flex-direction: column;
+  gap: 50px;
+  display: flex;
+  align-items: left;
+}
+.video-button {
+  position: relative;
+  background: #fff;
+  color: #fff;
+  text-decoration: none;
+  text-transform: uppercase;
+  font-size: 1em;
+  letter-spacing: 0.1em;
+  font-weight: 400;
+  padding: 10px 30px;
+  transition: 0.5s;
+}
+.video-button:hover {
+  background: #1e9bff;
+  color: #1e9bff;
+  box-shadow: 0 0 35px #1e9bff;
+  letter-spacing: 0.25em;
+}
+.video-button:before {
+  content: "";
+  position: absolute;
+  inset: 2px;
+  background: #27282c;
+}
+.video-button span {
+  position: relative;
+  z-index: 1;
+}
+.video-button i {
+  position: absolute;
+  inset: 0;
+  display: block;
+}
+.video-button i::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 80%;
+  width: 10px;
+  height: 4px;
+  background: #27282c;
+  transform: translateX(-50%) skewX(325deg);
+  transition: 0.5s;
+}
+.video-button:hover i::before {
+  width: 20px;
+  left: 20%;
+}
+.video-button i::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 20%;
+  width: 10px;
+  height: 4px;
+  background: #27282c;
+  transform: translateX(-50%) skewX(325deg);
+  transition: 0.5s;
+}
+.video-button:hover i::after {
+  width: 20px;
+  left: 80%;
+}
+
+.active,
+.active:hover {
+  background: #1e9bff;
+  color: #1e9bff;
+  box-shadow: 0 0 35px #1e9bff;
+  letter-spacing: 0.25em;
+  pointer-events: none;
 }
 
 .radio-buttons {
@@ -399,11 +465,6 @@ video {
   height: 50vh;
   width: 100vh;
   display: none;
-}
-
-.player {
-  display: flex;
-  position: relative;
 }
 
 .video-wrapper {
