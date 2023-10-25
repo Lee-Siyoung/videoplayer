@@ -366,7 +366,6 @@ export default defineComponent({
 .player {
   display: flex;
   position: relative;
-  flex-wrap: wrap;
 }
 
 .videoList {
@@ -538,11 +537,10 @@ video {
 
 .video-wrapper {
   position: relative;
-  left: 10vw;
+  left: 5vw;
 }
 
 .controls {
-  opacity: 0;
   width: 400px;
   border-radius: 10px;
   position: absolute;
@@ -558,11 +556,6 @@ video {
 
 .controls > button {
   background: linear-gradient(to bottom, #222, #666);
-}
-
-.video-wrapper:hover .controls,
-.video-wrapper:focus .controls {
-  opacity: 1;
 }
 
 .controls > :before {
