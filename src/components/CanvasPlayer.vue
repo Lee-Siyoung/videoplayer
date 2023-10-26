@@ -577,6 +577,8 @@ h1 {
   font-size: 2em;
   margin-bottom: 10px;
   margin-top: 10px;
+  letter-spacing: 0.1em;
+  font-weight: 400;
 }
 .radio-buttons label {
   cursor: pointer;
