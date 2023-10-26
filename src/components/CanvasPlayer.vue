@@ -550,7 +550,7 @@ video {
 }
 .border {
   position: absolute;
-  left: 20vw;
+  left: 18.5vw;
   top: 1vw;
   border: 1px solid rgb(121, 121, 121);
   width: 55vw;
