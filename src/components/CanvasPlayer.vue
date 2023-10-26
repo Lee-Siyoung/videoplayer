@@ -431,6 +431,7 @@ h1 {
   font-weight: 400;
   padding: 10px 30px;
   transition: 0.5s;
+  cursor: pointer;
 }
 .video-button:hover {
   background: #1e9bff;
