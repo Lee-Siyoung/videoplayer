@@ -1,6 +1,6 @@
 <template>
   <div class="player">
-    <div>
+    <div class="scroll">
       <li
         class="videoList"
         v-for="(video, index) in state.IVideo"
@@ -117,6 +117,11 @@ export default defineComponent({
           src: "",
           name: "",
           fps: 25,
+        },
+        {
+          src: "",
+          name: "",
+          fps: 29.97,
         },
         {
           src: "",
@@ -318,6 +323,7 @@ export default defineComponent({
           .toUpperCase();
         index++;
       }
+      console.log(state.IVideo);
       if (videoEl.value) {
         videoEl.value.src = state.IVideo[state.videoIndex].src;
       }
@@ -473,6 +479,11 @@ h1 {
 .active i::after {
   width: 20px;
   left: 80%;
+}
+
+.scroll {
+  overflow: auto;
+  height: 30vw;
 }
 /*  */
 .action {
