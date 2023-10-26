@@ -133,6 +133,11 @@ export default defineComponent({
           name: "",
           fps: 29.97,
         },
+        {
+          src: "",
+          name: "",
+          fps: 24,
+        },
       ],
     });
     const canvas = ref<HTMLCanvasElement | null>(null);
