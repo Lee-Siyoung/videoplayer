@@ -121,12 +121,22 @@ export default defineComponent({
         {
           src: "",
           name: "",
+          fps: 23.98,
+        },
+        {
+          src: "",
+          name: "",
           fps: 29.97,
         },
         {
           src: "",
           name: "",
           fps: 23.98,
+        },
+        {
+          src: "",
+          name: "",
+          fps: 29.97,
         },
         {
           src: "",
