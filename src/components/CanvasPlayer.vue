@@ -505,6 +505,15 @@ h1 {
   overflow: auto;
   height: 25.5vw;
 }
+.scroll::-webkit-scrollbar {
+  width: 0.5vw;
+}
+.scroll::-webkit-scrollbar-thumb {
+  background-color: #1e9bff;
+}
+.scroll::-webkit-scrollbar-track {
+  background-color: #fff;
+}
 /*  */
 .action {
   position: relative;
