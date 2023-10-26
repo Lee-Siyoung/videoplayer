@@ -689,7 +689,7 @@ video {
 
 .timer div {
   position: absolute;
-  background-color: rgba(255, 255, 255, 0.233);
+  background-color: rgba(101, 98, 98, 0.362);
   left: 0;
   top: 0;
   width: 0;
