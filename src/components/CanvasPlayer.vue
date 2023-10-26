@@ -18,8 +18,8 @@
         </a>
       </li>
     </div>
-    <div class="border"></div>
     <div class="video-wrapper">
+      <div class="border"></div>
       <h1>{{ state.IVideo[state.videoIndex].name }}</h1>
       <div class="test">
         <video ref="videoEl">
@@ -504,7 +504,7 @@ h1 {
   top: 80px;
   right: -10px;
   padding: 10px 20px;
-  background: #b3b2b2;
+  background: #1e9bff;
   width: 200px;
   box-sizing: 0 5px 25px rgba(0, 0, 0, 0.1);
   border-radius: 15px;
@@ -523,7 +523,7 @@ h1 {
   right: 28px;
   width: 20px;
   height: 20px;
-  background: #b3b2b2;
+  background: #1e9bff;
   transform: rotate(45deg);
 }
 /*  */
@@ -610,13 +610,13 @@ video {
 
 .video-wrapper {
   position: relative;
-  left: 5vw;
+  left: 10vw;
 }
 .border {
   position: absolute;
-  left: 18.5vw;
+  right: -54px;
   top: 1vw;
-  border: 1px solid rgb(121, 121, 121);
+  border: 1px solid #fff;
   width: 55vw;
   height: 45vw;
 }
