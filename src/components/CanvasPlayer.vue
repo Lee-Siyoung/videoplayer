@@ -121,6 +121,11 @@ export default defineComponent({
         {
           src: "",
           name: "",
+          fps: 29.97,
+        },
+        {
+          src: "",
+          name: "",
           fps: 23.98,
         },
         {
@@ -498,7 +503,7 @@ h1 {
 
 .scroll {
   overflow: auto;
-  height: 30vw;
+  height: 25.5vw;
 }
 /*  */
 .action {
