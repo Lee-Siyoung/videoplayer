@@ -1,6 +1,6 @@
 <template>
   <div class="player">
-    <!-- <div class="scroll">
+    <div class="scroll">
       <li
         class="videoList"
         v-for="(video, index) in state.IVideo"
@@ -17,7 +17,7 @@
           <i></i>
         </a>
       </li>
-    </div> -->
+    </div>
     <div class="video-wrapper">
       <div class="border"></div>
       <h1>{{ state.IVideo[state.videoIndex].name }}</h1>
@@ -81,19 +81,19 @@ interface State {
   formattedTime: string;
   videoDuration: string;
   autoPlay: boolean;
-  /* videoIndex: number; */
+  videoIndex: number;
   isDragging: boolean;
   animationFrameId: number;
   interval: number;
   timeCode: string;
-  /* IVideo: IVideo[]; */
+  IVideo: IVideo[];
 }
 
-/* interface IVideo {
+interface IVideo {
   src: string;
   name: string;
   fps: number;
-} */
+}
 
 export default defineComponent({
   setup() {
@@ -102,62 +102,22 @@ export default defineComponent({
       formattedTime: "00:00",
       videoDuration: "00:00",
       autoPlay: false,
-      /* videoIndex: 0, */
+      videoIndex: 0,
       isDragging: false,
       animationFrameId: 0,
       interval: 10,
       timeCode: "00:00:00:00",
-      /* IVideo: [
+      IVideo: [
         {
           src: "",
           name: "",
           fps: 24,
         },
-        {
-          src: "",
-          name: "",
-          fps: 25,
-        },
-        {
-          src: "",
-          name: "",
-          fps: 29.97,
-        },
-        {
-          src: "",
-          name: "",
-          fps: 23.98,
-        },
-        {
-          src: "",
-          name: "",
-          fps: 29.97,
-        },
-        {
-          src: "",
-          name: "",
-          fps: 23.98,
-        },
-        {
-          src: "",
-          name: "",
-          fps: 29.97,
-        },
-        {
-          src: "",
-          name: "",
-          fps: 29.97,
-        },
-        {
-          src: "",
-          name: "",
-          fps: 24,
-        },
-      ], */
+      ],
     });
-    /* const canvas = ref<HTMLCanvasElement | null>(null);
+    const canvas = ref<HTMLCanvasElement | null>(null);
     const ctx = ref<CanvasRenderingContext2D | null>(null);
-    const videoEl = ref<HTMLVideoElement | null>(null); */
+    const videoEl = ref<HTMLVideoElement | null>(null);
     const controlEl = ref<HTMLElement | null>(null);
     const timerWrapper = ref<HTMLElement | null>(null);
     const progressbar = ref<HTMLElement | null>(null);
@@ -321,15 +281,15 @@ export default defineComponent({
       state.isDragging = false;
     };
 
-    /* const clickVideo = (index: number) => {
+    const clickVideo = (index: number) => {
       state.videoIndex = index;
       if (videoEl.value) {
         videoEl.value.src = state.IVideo[state.videoIndex].src;
       }
-    }; */
+    };
 
     onMounted(() => {
-      /* const context = require.context("../assets", false, /\.(mp4|webm)$/);
+      const context = require.context("../assets", false, /\.(mp4|webm)$/);
       const filenames = context
         .keys()
         .map((key) => key.replace("./", "").replace(".mp4", ""));
@@ -346,7 +306,7 @@ export default defineComponent({
       console.log(state.IVideo);
       if (videoEl.value) {
         videoEl.value.src = state.IVideo[state.videoIndex].src;
-      } */
+      }
       if (canvas.value) {
         ctx.value = canvas.value.getContext("2d") as CanvasRenderingContext2D;
       }
@@ -375,8 +335,8 @@ export default defineComponent({
 
     return {
       state,
-      /* videoEl,
-      controlEl, */
+      videoEl,
+      controlEl,
       timerWrapper,
       progressbar,
       menuToggle,
@@ -386,7 +346,7 @@ export default defineComponent({
       toggleStop,
       seekToTime,
       canvas,
-      /* ctx, */
+      ctx,
       clickVideo,
     };
   },
@@ -405,16 +365,16 @@ export default defineComponent({
   font-style: normal;
 }
 
-/* .player {
+.player {
   display: flex;
   position: relative;
   height: 100vh;
   background: #27282c;
-} */
+}
 h1 {
   color: #fff;
 }
-/* .videoList {
+.videoList {
   flex-direction: column;
   gap: 50px;
   display: flex;
@@ -514,7 +474,7 @@ h1 {
 }
 .scroll::-webkit-scrollbar-track {
   background-color: #fff;
-} */
+}
 /*  */
 .action {
   position: relative;
