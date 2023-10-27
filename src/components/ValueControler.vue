@@ -22,6 +22,8 @@ export default defineComponent({
 
     return {
       videoEl,
+      canvas,
+      ctx,
       updateVideoSrc,
     };
   },
