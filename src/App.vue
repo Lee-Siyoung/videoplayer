@@ -5,7 +5,7 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 /* import CanvasPlayer from "./components/CanvasPlayer.vue"; */
-import CanvasPlayer from "./components/ValueControler.vue";
+import CanvasPlayer from "./components/VideoControler.vue";
 export default defineComponent({
   name: "App",
   components: {

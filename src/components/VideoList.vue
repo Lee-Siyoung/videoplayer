@@ -20,7 +20,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, reactive, PropType, onMounted } from "vue";
+import { defineComponent, reactive, onMounted, ref } from "vue";
 
 interface IVideo {
   src: string;
@@ -34,13 +34,8 @@ interface State {
 }
 
 export default defineComponent({
-  props: {
-    videoEl: {
-      type: Object as PropType<HTMLVideoElement | null>,
-      required: true,
-    },
-  },
-  setup(props, { emit }) {
+  setup() {
+    const videoEl = ref<HTMLVideoElement | null>(null);
     const state = reactive<State>({
       videoIndex: 0,
       IVideo: [
@@ -93,7 +88,9 @@ export default defineComponent({
     });
     const clickVideo = (index: number) => {
       state.videoIndex = index;
-      emit("updateVideoSrc", state.IVideo[state.videoIndex].src);
+      if (videoEl.value) {
+        videoEl.value.src = state.IVideo[state.videoIndex].src;
+      }
     };
     onMounted(() => {
       const context = require.context("../assets", false, /\.(mp4|webm)$/);
@@ -111,8 +108,8 @@ export default defineComponent({
         index++;
       }
       console.log(state.IVideo);
-      if (props.videoEl) {
-        emit("updateVideoSrc", state.IVideo[state.videoIndex].src);
+      if (videoEl.value) {
+        videoEl.value.src = state.IVideo[state.videoIndex].src;
       }
     });
     return { state, clickVideo };
