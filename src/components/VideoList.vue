@@ -20,7 +20,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, reactive, onMounted, ref } from "vue";
+import { defineComponent, reactive, onMounted, PropType } from "vue";
 
 interface IVideo {
   src: string;
@@ -34,8 +34,14 @@ interface State {
 }
 
 export default defineComponent({
-  setup() {
-    const videoEl = ref<HTMLVideoElement | null>(null);
+  props: {
+    videoEl: {
+      type: Object as PropType<HTMLVideoElement | null>,
+      required: true,
+    },
+  },
+  emits: ["updateSrc"],
+  setup(props, { emit }) {
     const state = reactive<State>({
       videoIndex: 0,
       IVideo: [
@@ -86,13 +92,14 @@ export default defineComponent({
         },
       ],
     });
+    console.log("videolist");
     const clickVideo = (index: number) => {
       state.videoIndex = index;
-      if (videoEl.value) {
-        videoEl.value.src = state.IVideo[state.videoIndex].src;
-      }
+      const newSrc = state.IVideo[state.videoIndex].src;
+      emit("updateSrc", newSrc);
     };
     onMounted(() => {
+      console.log("videolist onMounted");
       const context = require.context("../assets", false, /\.(mp4|webm)$/);
       const filenames = context
         .keys()
@@ -107,10 +114,8 @@ export default defineComponent({
           .toUpperCase();
         index++;
       }
-      console.log(state.IVideo);
-      if (videoEl.value) {
-        videoEl.value.src = state.IVideo[state.videoIndex].src;
-      }
+      const initialSrc = state.IVideo[state.videoIndex].src;
+      emit("updateSrc", initialSrc);
     });
     return { state, clickVideo };
   },
