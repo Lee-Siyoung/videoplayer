@@ -1,6 +1,10 @@
 <template>
   <div class="player">
-    <VideoList :videoEl="videoEl" @updateSrc="updateSrc" />
+    <VideoList
+      :videoEl="videoEl"
+      @updateSrc="updateSrc"
+      @updateState="updateState"
+    />
     <div class="video-wrapper">
       <div class="border"></div>
       <div class="test">
@@ -26,6 +30,7 @@
       <ProgressBar
         v-if="videoEl !== null"
         :videoEl="videoEl"
+        :videoData="videoData"
         @seekVideo="handleSeekVideo"
       />
     </div>
@@ -45,11 +50,17 @@ export default defineComponent({
     const videoEl = ref<HTMLVideoElement | null>(null);
     const canvas = ref<HTMLCanvasElement | null>(null);
     const ctx = ref<CanvasRenderingContext2D | null>(null);
-
+    const videoData = ref({
+      videoIndex: 0,
+      IVideo: [],
+    });
     const updateSrc = (src: string) => {
       if (videoEl.value) {
         videoEl.value.src = src;
       }
+    };
+    const updateState = (updatedState: any) => {
+      videoData.value = updatedState;
     };
     const handleResetVideo = () => {
       if (videoEl.value) {
@@ -92,6 +103,8 @@ export default defineComponent({
       handleForwardVideo,
       handleEndVideo,
       handleSeekVideo,
+      videoData,
+      updateState,
     };
   },
 });

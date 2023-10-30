@@ -23,7 +23,6 @@ export default defineComponent({
     },
   },
   setup(props) {
-    console.log("drawcanvas");
     const localCtx = ref<CanvasRenderingContext2D | null>(props.ctx);
     const localCanvas = ref<HTMLCanvasElement | null>(props.canvas);
     const state = reactive<State>({

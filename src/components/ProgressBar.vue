@@ -9,17 +9,33 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, reactive, ref, watch } from "vue";
+import {
+  defineComponent,
+  onMounted,
+  PropType,
+  reactive,
+  ref,
+  watch,
+} from "vue";
 interface State {
   videoDuration: string;
   formattedTime: string;
   timeCode: string;
   isDragging: boolean;
 }
+interface Video {
+  src: string;
+  name: string;
+  fps: number;
+}
 export default defineComponent({
   props: {
     videoEl: {
       type: Object as PropType<HTMLVideoElement | null>,
+      required: true,
+    },
+    videoData: {
+      type: Object as () => { videoIndex: number; IVideo: Video[] },
       required: true,
     },
   },
@@ -35,7 +51,7 @@ export default defineComponent({
     const progressbar = ref<HTMLElement | null>(null);
     const setTime = () => {
       if (props.videoEl && timerWrapper.value && progressbar.value) {
-        /* state.timeCode = smpteTimeCode(props.videoEl.currentTime); */
+        state.timeCode = smpteTimeCode(props.videoEl.currentTime);
         const minutes = Math.floor(props.videoEl.currentTime / 60);
         const seconds = Math.floor(props.videoEl.currentTime - minutes * 60);
         const totalMinutes = Math.floor(props.videoEl.duration / 60);
@@ -83,8 +99,8 @@ export default defineComponent({
     const endDrag = () => {
       state.isDragging = false;
     };
-    /* const smpteTimeCode = (currentTime: number) => {
-      const videoFps = state.IVideo[state.videoIndex].fps;
+    const smpteTimeCode = (currentTime: number) => {
+      const videoFps = props.videoData.IVideo[props.videoData.videoIndex].fps;
       const totalFrames = Math.floor(currentTime * videoFps);
       const hours = Math.floor(totalFrames / (60 * 60 * videoFps));
       const minutes = Math.floor((totalFrames / (60 * videoFps)) % 60);
@@ -96,10 +112,10 @@ export default defineComponent({
         .toString()
         .padStart(2, "0")}`;
     };
-    */
+
     const update = () => {
       if (props.videoEl) {
-        /* state.timeCode = smpteTimeCode(props.videoEl.currentTime); */
+        state.timeCode = smpteTimeCode(props.videoEl.currentTime);
       }
     };
 
@@ -107,9 +123,6 @@ export default defineComponent({
       () => props.videoEl,
       (newVideoEl) => {
         if (newVideoEl) {
-          timerWrapper.value?.addEventListener("mousedown", startDrag);
-          timerWrapper.value?.addEventListener("mousemove", duringDrag);
-          timerWrapper.value?.addEventListener("mouseup", endDrag);
           newVideoEl.addEventListener("loadedmetadata", () => {
             setTime();
             setInterval(update, 1000 / 24);
@@ -121,6 +134,12 @@ export default defineComponent({
       },
       { immediate: true }
     );
+    onMounted(() => {
+      timerWrapper.value?.addEventListener("mousedown", startDrag);
+      timerWrapper.value?.addEventListener("mousemove", duringDrag);
+      timerWrapper.value?.addEventListener("mouseup", endDrag);
+      console.log(timerWrapper.value);
+    });
     return { state, seekToTime };
   },
 });

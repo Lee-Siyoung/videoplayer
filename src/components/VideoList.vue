@@ -20,7 +20,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, reactive, onMounted, PropType } from "vue";
+import { defineComponent, reactive, onMounted, PropType, watch } from "vue";
 
 interface IVideo {
   src: string;
@@ -40,8 +40,8 @@ export default defineComponent({
       required: true,
     },
   },
-  emits: ["updateSrc"],
-  setup(props, { emit }) {
+  emits: ["updateSrc", "updateState"],
+  setup(_, { emit }) {
     const state = reactive<State>({
       videoIndex: 0,
       IVideo: [
@@ -98,8 +98,10 @@ export default defineComponent({
       const newSrc = state.IVideo[state.videoIndex].src;
       emit("updateSrc", newSrc);
     };
+    watch(state, (newState) => {
+      emit("updateState", newState);
+    });
     onMounted(() => {
-      console.log("videolist onMounted");
       const context = require.context("../assets", false, /\.(mp4|webm)$/);
       const filenames = context
         .keys()
