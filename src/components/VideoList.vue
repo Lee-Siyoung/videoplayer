@@ -92,7 +92,7 @@ export default defineComponent({
         },
       ],
     });
-    console.log("videolist");
+
     const clickVideo = (index: number) => {
       state.videoIndex = index;
       const newSrc = state.IVideo[state.videoIndex].src;

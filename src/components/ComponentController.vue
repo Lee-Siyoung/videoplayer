@@ -23,6 +23,11 @@
         @forwardVideo="handleForwardVideo"
         @endVideo="handleEndVideo"
       />
+      <ProgressBar
+        v-if="videoEl !== null"
+        :videoEl="videoEl"
+        @seekVideo="handleSeekVideo"
+      />
     </div>
   </div>
 </template>
@@ -30,16 +35,17 @@
 <script lang="ts">
 import { defineComponent, ref, onMounted } from "vue";
 import DrawCanvas from "./DrawCanvas.vue";
+import ProgressBar from "./ProgressBar.vue";
 import VideoController from "./VideoController.vue";
 import VideoList from "./VideoList.vue";
 
 export default defineComponent({
-  components: { VideoList, DrawCanvas, VideoController },
+  components: { VideoList, DrawCanvas, VideoController, ProgressBar },
   setup() {
     const videoEl = ref<HTMLVideoElement | null>(null);
     const canvas = ref<HTMLCanvasElement | null>(null);
     const ctx = ref<CanvasRenderingContext2D | null>(null);
-    console.log("controler");
+
     const updateSrc = (src: string) => {
       if (videoEl.value) {
         videoEl.value.src = src;
@@ -65,6 +71,11 @@ export default defineComponent({
         videoEl.value.currentTime = videoEl.value.duration;
       }
     };
+    const handleSeekVideo = (time: number) => {
+      if (videoEl.value) {
+        videoEl.value.currentTime = time;
+      }
+    };
 
     onMounted(() => {
       if (canvas.value) {
@@ -80,6 +91,7 @@ export default defineComponent({
       handleBackwardVideo,
       handleForwardVideo,
       handleEndVideo,
+      handleSeekVideo,
     };
   },
 });
@@ -92,10 +104,22 @@ export default defineComponent({
   height: 100vh;
   background: #27282c;
 }
+.video-wrapper {
+  position: relative;
+  left: 10vw;
+}
+.border {
+  position: absolute;
+  right: -54px;
+  top: 1vw;
+  border: 1px solid #fff;
+  width: 55vw;
+  height: 45vw;
+}
 video {
   height: 50vh;
   width: 100vh;
-  /* display: none; */
+  display: none;
 }
 canvas {
   height: 50vh;

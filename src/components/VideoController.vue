@@ -130,6 +130,9 @@ export default defineComponent({
 .play {
   border-radius: 10px 0 0 10px;
 }
+.fwd {
+  border-radius: 0 10px 10px 0;
+}
 .controls > button:hover,
 .controls > button:focus {
   box-shadow: inset 1px 1px 2px black;
