@@ -70,9 +70,10 @@ export default defineComponent({
         }
       }
     };
+
     watch(
       () => props.videoEl,
-      (newVideoEl, oldVideoEl) => {
+      (newVideoEl) => {
         if (newVideoEl && localCanvas.value) {
           localCtx.value = localCanvas.value.getContext("2d");
           newVideoEl.addEventListener("loadedmetadata", () => {

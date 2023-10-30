@@ -1,15 +1,15 @@
 <template>
-  <CanvasPlayer msg="CanvasPlayer" />
+  <ComponentController msg="ComponentController" />
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
 /* import CanvasPlayer from "./components/CanvasPlayer.vue"; */
-import CanvasPlayer from "./components/VideoControler.vue";
+import ComponentController from "./components/ComponentController.vue";
 export default defineComponent({
   name: "App",
   components: {
-    CanvasPlayer,
+    ComponentController,
   },
 });
 </script>

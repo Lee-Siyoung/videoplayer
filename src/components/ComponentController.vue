@@ -2,6 +2,7 @@
   <div class="player">
     <VideoList :videoEl="videoEl" @updateSrc="updateSrc" />
     <div class="video-wrapper">
+      <div class="border"></div>
       <div class="test">
         <video ref="videoEl" controls>
           <source src="" type="video/mp4" />
@@ -14,6 +15,14 @@
           :ctx="ctx"
         />
       </div>
+      <VideoController
+        v-if="videoEl !== null"
+        :videoEl="videoEl"
+        @resetVideo="handleResetVideo"
+        @backwardVideo="handleBackwardVideo"
+        @forwardVideo="handleForwardVideo"
+        @endVideo="handleEndVideo"
+      />
     </div>
   </div>
 </template>
@@ -21,10 +30,11 @@
 <script lang="ts">
 import { defineComponent, ref, onMounted } from "vue";
 import DrawCanvas from "./DrawCanvas.vue";
+import VideoController from "./VideoController.vue";
 import VideoList from "./VideoList.vue";
 
 export default defineComponent({
-  components: { VideoList, DrawCanvas },
+  components: { VideoList, DrawCanvas, VideoController },
   setup() {
     const videoEl = ref<HTMLVideoElement | null>(null);
     const canvas = ref<HTMLCanvasElement | null>(null);
@@ -35,12 +45,42 @@ export default defineComponent({
         videoEl.value.src = src;
       }
     };
+    const handleResetVideo = () => {
+      if (videoEl.value) {
+        videoEl.value.currentTime = 0;
+      }
+    };
+    const handleBackwardVideo = (interval: number) => {
+      if (videoEl.value) {
+        videoEl.value.currentTime -= interval;
+      }
+    };
+    const handleForwardVideo = (interval: number) => {
+      if (videoEl.value) {
+        videoEl.value.currentTime += interval;
+      }
+    };
+    const handleEndVideo = () => {
+      if (videoEl.value) {
+        videoEl.value.currentTime = videoEl.value.duration;
+      }
+    };
+
     onMounted(() => {
       if (canvas.value) {
         ctx.value = canvas.value.getContext("2d") as CanvasRenderingContext2D;
       }
     });
-    return { videoEl, canvas, ctx, updateSrc };
+    return {
+      videoEl,
+      canvas,
+      ctx,
+      updateSrc,
+      handleResetVideo,
+      handleBackwardVideo,
+      handleForwardVideo,
+      handleEndVideo,
+    };
   },
 });
 </script>
