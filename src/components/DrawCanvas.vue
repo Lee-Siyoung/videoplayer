@@ -69,7 +69,6 @@ export default defineComponent({
         }
       }
     };
-
     watch(
       () => props.videoEl,
       (newVideoEl) => {

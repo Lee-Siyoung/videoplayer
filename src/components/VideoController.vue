@@ -8,7 +8,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, reactive } from "vue";
+import { defineComponent, PropType, reactive, watch } from "vue";
 interface State {
   interval: number;
 }
@@ -16,6 +16,10 @@ export default defineComponent({
   props: {
     videoEl: {
       type: Object as PropType<HTMLVideoElement | null>,
+      required: true,
+    },
+    autoPlay: {
+      type: Boolean,
       required: true,
     },
   },
@@ -68,6 +72,21 @@ export default defineComponent({
       }
     };
 
+    watch(
+      () => props.videoEl,
+      (newVideoEl) => {
+        if (newVideoEl) {
+          newVideoEl.addEventListener("loadedmetadata", () => {
+            if (props.autoPlay) {
+              togglePlay();
+            } else {
+              toggleStop();
+            }
+          });
+        }
+      },
+      { immediate: true }
+    );
     return { goForward, goBackward, togglePlay, toggleStop };
   },
 });

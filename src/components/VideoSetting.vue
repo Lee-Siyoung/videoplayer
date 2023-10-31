@@ -31,7 +31,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, reactive, watch } from "vue";
+import { defineComponent, PropType, reactive, watch, inject } from "vue";
 interface State {
   autoPlay: boolean;
   isActive: boolean;
@@ -42,16 +42,9 @@ export default defineComponent({
       type: Object as PropType<HTMLVideoElement | null>,
       required: true,
     },
-    canvas: {
-      type: Object as PropType<HTMLCanvasElement | null>,
-      required: true,
-    },
-    ctx: {
-      type: Object as PropType<CanvasRenderingContext2D | null>,
-      required: true,
-    },
   },
-  setup(props) {
+  emits: ["updateAutoPlay"],
+  setup(props, { emit }) {
     const state = reactive<State>({
       autoPlay: false,
       isActive: false,
@@ -60,20 +53,12 @@ export default defineComponent({
       state.isActive = !state.isActive;
     };
     watch(
-      () => props.videoEl,
-      (newVideoEl) => {
-        if (newVideoEl) {
-          newVideoEl.addEventListener("loadedmetadata", () => {
-            if (state.autoPlay) {
-              /* togglePlay(); */
-            } else {
-              /* toggleStop(); */
-            }
-          });
-        }
-      },
-      { immediate: true }
+      () => state.autoPlay,
+      (newVal) => {
+        emit("updateAutoPlay", newVal);
+      }
     );
+
     return { state, menuToggle };
   },
 });

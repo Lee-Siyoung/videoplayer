@@ -22,6 +22,7 @@
       <VideoController
         v-if="videoEl !== null"
         :videoEl="videoEl"
+        :autoPlay="state.autoPlay"
         @resetVideo="handleResetVideo"
         @backwardVideo="handleBackwardVideo"
         @forwardVideo="handleForwardVideo"
@@ -37,19 +38,21 @@
     <VideoSetting
       v-if="videoEl !== null"
       :videoEl="videoEl"
-      :canvas="canvas"
-      :ctx="ctx"
+      @updateAutoPlay="handleUpdateAutoPlay"
     />
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, onMounted } from "vue";
+import { defineComponent, ref, onMounted, reactive } from "vue";
 import DrawCanvas from "./DrawCanvas.vue";
 import ProgressBar from "./ProgressBar.vue";
 import VideoController from "./VideoController.vue";
 import VideoList from "./VideoList.vue";
 import VideoSetting from "./VideoSetting.vue";
+interface State {
+  autoPlay: boolean;
+}
 interface VideoState {
   videoIndex: number;
   IVideo: IVideo[];
@@ -76,6 +79,7 @@ export default defineComponent({
       videoIndex: 0,
       IVideo: [],
     });
+    const state = reactive<State>({ autoPlay: false });
     const updateSrc = (src: string) => {
       if (videoEl.value) {
         videoEl.value.src = src;
@@ -109,6 +113,9 @@ export default defineComponent({
         videoEl.value.currentTime = time;
       }
     };
+    const handleUpdateAutoPlay = (autoPlay: boolean) => {
+      state.autoPlay = autoPlay;
+    };
 
     onMounted(() => {
       if (canvas.value) {
@@ -116,6 +123,7 @@ export default defineComponent({
       }
     });
     return {
+      state,
       videoEl,
       canvas,
       ctx,
@@ -127,6 +135,7 @@ export default defineComponent({
       handleSeekVideo,
       videoData,
       updateState,
+      handleUpdateAutoPlay,
     };
   },
 });
