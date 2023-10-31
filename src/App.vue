@@ -4,7 +4,6 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-/* import CanvasPlayer from "./components/CanvasPlayer.vue"; */
 import ComponentController from "./components/ComponentController.vue";
 export default defineComponent({
   name: "App",

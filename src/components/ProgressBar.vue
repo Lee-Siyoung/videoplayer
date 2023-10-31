@@ -86,7 +86,6 @@ export default defineComponent({
         const barWidth = barRect.width;
         const newTime = (clickX / barWidth) * props.videoEl.duration;
         emit("seekVideo", newTime);
-        //drawCanvas();
       }
     };
     const startDrag = (event: MouseEvent) => {
