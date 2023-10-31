@@ -28,7 +28,7 @@
         @endVideo="handleEndVideo"
       />
       <ProgressBar
-        v-show="videoEl !== null"
+        v-if="videoEl !== null"
         :videoEl="videoEl"
         :videoData="videoData"
         @seekVideo="handleSeekVideo"

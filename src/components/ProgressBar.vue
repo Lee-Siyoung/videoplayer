@@ -130,31 +130,22 @@ export default defineComponent({
       }
     };
 
-    let handleVideoChange: (() => void) | null = null;
-
-    onMounted(() => {
-      handleVideoChange = () => {
-        if (props.videoEl) {
-          props.videoEl.addEventListener("loadedmetadata", () => {
+    watch(
+      () => props.videoEl,
+      (newVideoEl) => {
+        console.log(newVideoEl);
+        if (newVideoEl) {
+          newVideoEl.addEventListener("loadedmetadata", () => {
             setTime();
             setInterval(update, 1000 / 24);
-            props.videoEl?.addEventListener("timeupdate", () => {
+            newVideoEl.addEventListener("timeupdate", () => {
               setTime();
+              /* drawCanvas(); */
             });
           });
         }
-      };
-
-      handleVideoChange();
-    });
-
-    watch(
-      () => props.videoEl,
-      () => {
-        if (handleVideoChange) {
-          handleVideoChange();
-        }
-      }
+      },
+      { immediate: true }
     );
     return { state, seekToTime, startDrag, duringDrag, endDrag };
   },
