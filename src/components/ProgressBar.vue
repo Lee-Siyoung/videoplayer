@@ -126,7 +126,6 @@ export default defineComponent({
     watch(
       () => props.videoEl,
       (newVideoEl) => {
-        console.log(newVideoEl);
         if (newVideoEl) {
           newVideoEl.addEventListener("loadedmetadata", () => {
             setTime();

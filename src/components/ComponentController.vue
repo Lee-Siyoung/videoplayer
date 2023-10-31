@@ -50,7 +50,15 @@ import ProgressBar from "./ProgressBar.vue";
 import VideoController from "./VideoController.vue";
 import VideoList from "./VideoList.vue";
 import VideoSetting from "./VideoSetting.vue";
-
+interface VideoState {
+  videoIndex: number;
+  IVideo: IVideo[];
+}
+interface IVideo {
+  src: string;
+  name: string;
+  fps: number;
+}
 export default defineComponent({
   components: {
     VideoList,
@@ -59,11 +67,12 @@ export default defineComponent({
     ProgressBar,
     VideoSetting,
   },
+
   setup() {
     const videoEl = ref<HTMLVideoElement | null>(null);
     const canvas = ref<HTMLCanvasElement | null>(null);
     const ctx = ref<CanvasRenderingContext2D | null>(null);
-    const videoData = ref({
+    const videoData = ref<VideoState>({
       videoIndex: 0,
       IVideo: [],
     });
@@ -72,7 +81,7 @@ export default defineComponent({
         videoEl.value.src = src;
       }
     };
-    const updateState = (updatedState: any) => {
+    const updateState = (updatedState: VideoState) => {
       videoData.value = updatedState;
     };
     const handleResetVideo = () => {
