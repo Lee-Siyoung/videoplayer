@@ -1,6 +1,12 @@
 <template>
-  <div class="timer" ref="timerWrapper" @click="seekToTime">
-    <div ref="progressbar"></div>
+  <div
+    class="timer"
+    @mousedown="startDrag"
+    @mousemove="duringDrag"
+    @mouseup="endDrag"
+    @click="seekToTime"
+  >
+    <div class="progressbar"></div>
     <span>{{ state.timeCode }}</span>
     <span class="time"
       >{{ state.formattedTime }} / {{ state.videoDuration }}</span
@@ -47,10 +53,12 @@ export default defineComponent({
       timeCode: "00:00:00:00",
       isDragging: false,
     });
-    const timerWrapper = ref<HTMLElement | null>(null);
-    const progressbar = ref<HTMLElement | null>(null);
+    const timerWrapperElement = document.querySelector(".timer") as HTMLElement;
+    const progressbarElement = document.querySelector(
+      ".progressbar"
+    ) as HTMLElement;
     const setTime = () => {
-      if (props.videoEl && timerWrapper.value && progressbar.value) {
+      if (props.videoEl) {
         state.timeCode = smpteTimeCode(props.videoEl.currentTime);
         const minutes = Math.floor(props.videoEl.currentTime / 60);
         const seconds = Math.floor(props.videoEl.currentTime - minutes * 60);
@@ -68,16 +76,19 @@ export default defineComponent({
         const videoDuration = `${totalMinuteValue}:${totalSecondValue}`;
         state.videoDuration = videoDuration;
 
-        const barLength =
-          (props.videoEl.currentTime / props.videoEl.duration) *
-            timerWrapper.value.clientWidth || 0;
-        progressbar.value.style.width = barLength + "px";
+        if (timerWrapperElement && progressbarElement) {
+          const barLength =
+            (props.videoEl.currentTime / props.videoEl.duration) *
+              timerWrapperElement.clientWidth || 0;
+          progressbarElement.style.width = barLength + "px";
+        }
       }
     };
 
     const seekToTime = (event: MouseEvent) => {
-      if (props.videoEl && timerWrapper.value) {
-        const barRect = timerWrapper.value.getBoundingClientRect();
+      if (props.videoEl) {
+        const targetElement = event.currentTarget as HTMLElement;
+        const barRect = targetElement.getBoundingClientRect();
         const clickX = event.clientX - barRect.left;
         const barWidth = barRect.width;
         const newTime = (clickX / barWidth) * props.videoEl.duration;
@@ -119,28 +130,33 @@ export default defineComponent({
       }
     };
 
-    watch(
-      () => props.videoEl,
-      (newVideoEl) => {
-        if (newVideoEl) {
-          newVideoEl.addEventListener("loadedmetadata", () => {
+    let handleVideoChange: (() => void) | null = null;
+
+    onMounted(() => {
+      handleVideoChange = () => {
+        if (props.videoEl) {
+          props.videoEl.addEventListener("loadedmetadata", () => {
             setTime();
             setInterval(update, 1000 / 24);
-            newVideoEl.addEventListener("timeupdate", () => {
+            props.videoEl?.addEventListener("timeupdate", () => {
               setTime();
             });
           });
         }
-      },
-      { immediate: true }
-    );
-    onMounted(() => {
-      timerWrapper.value?.addEventListener("mousedown", startDrag);
-      timerWrapper.value?.addEventListener("mousemove", duringDrag);
-      timerWrapper.value?.addEventListener("mouseup", endDrag);
-      console.log(timerWrapper.value);
+      };
+
+      handleVideoChange();
     });
-    return { state, seekToTime };
+
+    watch(
+      () => props.videoEl,
+      () => {
+        if (handleVideoChange) {
+          handleVideoChange();
+        }
+      }
+    );
+    return { state, seekToTime, startDrag, duringDrag, endDrag };
   },
 });
 </script>
