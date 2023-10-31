@@ -34,6 +34,12 @@
         @seekVideo="handleSeekVideo"
       />
     </div>
+    <VideoSetting
+      v-if="videoEl !== null"
+      :videoEl="videoEl"
+      :canvas="canvas"
+      :ctx="ctx"
+    />
   </div>
 </template>
 
@@ -43,9 +49,16 @@ import DrawCanvas from "./DrawCanvas.vue";
 import ProgressBar from "./ProgressBar.vue";
 import VideoController from "./VideoController.vue";
 import VideoList from "./VideoList.vue";
+import VideoSetting from "./VideoSetting.vue";
 
 export default defineComponent({
-  components: { VideoList, DrawCanvas, VideoController, ProgressBar },
+  components: {
+    VideoList,
+    DrawCanvas,
+    VideoController,
+    ProgressBar,
+    VideoSetting,
+  },
   setup() {
     const videoEl = ref<HTMLVideoElement | null>(null);
     const canvas = ref<HTMLCanvasElement | null>(null);

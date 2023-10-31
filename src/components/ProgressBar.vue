@@ -15,14 +15,7 @@
 </template>
 
 <script lang="ts">
-import {
-  defineComponent,
-  onMounted,
-  PropType,
-  reactive,
-  ref,
-  watch,
-} from "vue";
+import { defineComponent, PropType, reactive, watch } from "vue";
 interface State {
   videoDuration: string;
   formattedTime: string;
