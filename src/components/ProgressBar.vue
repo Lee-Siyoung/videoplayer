@@ -132,7 +132,6 @@ export default defineComponent({
             setInterval(update, 1000 / 24);
             newVideoEl.addEventListener("timeupdate", () => {
               setTime();
-              /* drawCanvas(); */
             });
           });
         }

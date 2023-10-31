@@ -32,7 +32,6 @@ export default defineComponent({
       if (props.videoEl) {
         if (props.videoEl.paused) {
           props.videoEl.play();
-          //drawCanvas();
         } else {
           props.videoEl.pause();
         }
@@ -54,7 +53,6 @@ export default defineComponent({
         } else {
           emit("backwardVideo", state.interval);
         }
-        //drawCanvas();
       }
     };
 
@@ -68,7 +66,6 @@ export default defineComponent({
         } else {
           emit("forwardVideo", state.interval);
         }
-        //drawCanvas();
       }
     };
 

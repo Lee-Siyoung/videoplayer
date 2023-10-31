@@ -7,6 +7,7 @@
     />
     <div class="video-wrapper">
       <div class="border"></div>
+      <h1>{{ state.name }}</h1>
       <div class="test">
         <video ref="videoEl" controls>
           <source src="" type="video/mp4" />
@@ -52,6 +53,7 @@ import VideoList from "./VideoList.vue";
 import VideoSetting from "./VideoSetting.vue";
 interface State {
   autoPlay: boolean;
+  name: string;
 }
 interface VideoState {
   videoIndex: number;
@@ -79,14 +81,16 @@ export default defineComponent({
       videoIndex: 0,
       IVideo: [],
     });
-    const state = reactive<State>({ autoPlay: false });
+    const state = reactive<State>({ autoPlay: false, name: "" });
     const updateSrc = (src: string) => {
       if (videoEl.value) {
         videoEl.value.src = src;
       }
     };
+
     const updateState = (updatedState: VideoState) => {
       videoData.value = updatedState;
+      state.name = videoData.value.IVideo[videoData.value.videoIndex].name;
     };
     const handleResetVideo = () => {
       if (videoEl.value) {
@@ -151,6 +155,10 @@ export default defineComponent({
 .video-wrapper {
   position: relative;
   left: 10vw;
+}
+h1 {
+  color: #fff;
+  padding: 10px;
 }
 .border {
   position: absolute;

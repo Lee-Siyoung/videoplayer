@@ -31,7 +31,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, reactive, watch, inject } from "vue";
+import { defineComponent, PropType, reactive, watch } from "vue";
 interface State {
   autoPlay: boolean;
   isActive: boolean;
