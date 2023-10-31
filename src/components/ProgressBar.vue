@@ -15,7 +15,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, reactive, watch } from "vue";
+import { defineComponent, PropType, reactive, watch, onUpdated } from "vue";
 interface State {
   videoDuration: string;
   formattedTime: string;
@@ -46,10 +46,7 @@ export default defineComponent({
       timeCode: "00:00:00:00",
       isDragging: false,
     });
-    const timerWrapperElement = document.querySelector(".timer") as HTMLElement;
-    const progressbarElement = document.querySelector(
-      ".progressbar"
-    ) as HTMLElement;
+
     const setTime = () => {
       if (props.videoEl) {
         state.timeCode = smpteTimeCode(props.videoEl.currentTime);
@@ -68,13 +65,6 @@ export default defineComponent({
 
         const videoDuration = `${totalMinuteValue}:${totalSecondValue}`;
         state.videoDuration = videoDuration;
-
-        if (timerWrapperElement && progressbarElement) {
-          const barLength =
-            (props.videoEl.currentTime / props.videoEl.duration) *
-              timerWrapperElement.clientWidth || 0;
-          progressbarElement.style.width = barLength + "px";
-        }
       }
     };
 
@@ -121,7 +111,20 @@ export default defineComponent({
         state.timeCode = smpteTimeCode(props.videoEl.currentTime);
       }
     };
-
+    onUpdated(() => {
+      const timerWrapperElement = document.querySelector(
+        ".timer"
+      ) as HTMLElement;
+      const progressbarElement = document.querySelector(
+        ".progressbar"
+      ) as HTMLElement;
+      if (timerWrapperElement && progressbarElement && props.videoEl) {
+        const barLength =
+          (props.videoEl.currentTime / props.videoEl.duration) *
+            timerWrapperElement.clientWidth || 0;
+        progressbarElement.style.width = barLength + "px";
+      }
+    });
     watch(
       () => props.videoEl,
       (newVideoEl) => {
@@ -155,6 +158,10 @@ export default defineComponent({
   color: #fff;
   height: 5vw;
   position: relative;
+}
+
+.progressbar {
+  background: #fff;
 }
 
 .timer div {
