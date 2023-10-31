@@ -23,7 +23,13 @@ export default defineComponent({
       required: true,
     },
   },
-  emits: ["resetVideo", "backwardVideo", "forwardVideo", "endVideo"],
+  emits: [
+    "resetVideo",
+    "backwardVideo",
+    "forwardVideo",
+    "endVideo",
+    "firstStop",
+  ],
   setup(props, { emit }) {
     const state = reactive<State>({
       interval: 10,
@@ -42,6 +48,13 @@ export default defineComponent({
       if (props.videoEl) {
         props.videoEl.pause();
         emit("resetVideo");
+      }
+    };
+
+    const firstStop = () => {
+      if (props.videoEl) {
+        props.videoEl.pause();
+        emit("firstStop");
       }
     };
 
@@ -77,14 +90,14 @@ export default defineComponent({
             if (props.autoPlay) {
               togglePlay();
             } else {
-              toggleStop();
+              firstStop();
             }
           });
         }
       },
       { immediate: true }
     );
-    return { goForward, goBackward, togglePlay, toggleStop };
+    return { goForward, goBackward, togglePlay, toggleStop, firstStop };
   },
 });
 </script>

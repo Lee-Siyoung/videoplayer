@@ -26,6 +26,7 @@ interface IVideo {
   src: string;
   name: string;
   fps: number;
+  currentTime: number;
 }
 
 interface State {
@@ -40,8 +41,8 @@ export default defineComponent({
       required: true,
     },
   },
-  emits: ["updateSrc", "updateState"],
-  setup(_, { emit }) {
+  emits: ["updateSrc", "updateState", "currentTime"],
+  setup(props, { emit }) {
     const state = reactive<State>({
       videoIndex: 0,
       IVideo: [
@@ -49,57 +50,69 @@ export default defineComponent({
           src: "",
           name: "",
           fps: 24,
+          currentTime: 0,
         },
         {
           src: "",
           name: "",
           fps: 25,
+          currentTime: 0,
         },
         {
           src: "",
           name: "",
           fps: 29.97,
+          currentTime: 0,
         },
         {
           src: "",
           name: "",
           fps: 23.98,
+          currentTime: 0,
         },
         {
           src: "",
           name: "",
           fps: 29.97,
+          currentTime: 0,
         },
         {
           src: "",
           name: "",
           fps: 23.98,
+          currentTime: 0,
         },
         {
           src: "",
           name: "",
           fps: 29.97,
+          currentTime: 0,
         },
         {
           src: "",
           name: "",
           fps: 29.97,
+          currentTime: 0,
         },
         {
           src: "",
           name: "",
           fps: 24,
+          currentTime: 0,
         },
       ],
     });
-
+    let a = 0;
     const clickVideo = (index: number) => {
       state.videoIndex = index;
       const newSrc = state.IVideo[state.videoIndex].src;
+      emit("currentTime", props.videoEl?.currentTime, a);
+
       emit("updateSrc", newSrc);
     };
     watch(state, (newState) => {
-      emit("updateState", newState);
+      a = newState.videoIndex;
+      emit("updateState", state);
     });
     onMounted(() => {
       const context = require.context("../assets", false, /\.(mp4|webm)$/);

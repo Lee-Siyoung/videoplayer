@@ -26,6 +26,7 @@ interface Video {
   src: string;
   name: string;
   fps: number;
+  currentTime: number;
 }
 export default defineComponent({
   props: {

@@ -4,6 +4,7 @@
       :videoEl="videoEl"
       @updateSrc="updateSrc"
       @updateState="updateState"
+      @currentTime="currentTime"
     />
     <div class="video-wrapper">
       <div class="border"></div>
@@ -28,6 +29,7 @@
         @backwardVideo="BackwardVideo"
         @forwardVideo="ForwardVideo"
         @endVideo="EndVideo"
+        @firstStop="firstStop"
       />
       <ProgressBar
         v-show="videoEl !== null"
@@ -63,6 +65,7 @@ interface IVideo {
   src: string;
   name: string;
   fps: number;
+  currentTime: number;
 }
 export default defineComponent({
   components: {
@@ -87,14 +90,24 @@ export default defineComponent({
         videoEl.value.src = src;
       }
     };
-
     const updateState = (updatedState: VideoState) => {
       videoData.value = updatedState;
       state.name = videoData.value.IVideo[videoData.value.videoIndex].name;
     };
+    const currentTime = (currentTime: number, index: number) => {
+      videoData.value.IVideo[index].currentTime = currentTime;
+      videoData.value.IVideo[index].src =
+        videoData.value.IVideo[index].src.split("#t=")[0] + "#t=" + currentTime;
+      console.log(videoData.value.IVideo[index].src);
+    };
     const ResetVideo = () => {
       if (videoEl.value) {
         videoEl.value.currentTime = 0;
+      }
+    };
+    const firstStop = () => {
+      if (videoEl.value) {
+        if (videoEl.value.currentTime == 0) videoEl.value.currentTime = 0;
       }
     };
     const BackwardVideo = (interval: number) => {
@@ -140,6 +153,8 @@ export default defineComponent({
       videoData,
       updateState,
       UpdateAutoPlay,
+      currentTime,
+      firstStop,
     };
   },
 });
