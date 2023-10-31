@@ -24,22 +24,22 @@
         v-if="videoEl !== null"
         :videoEl="videoEl"
         :autoPlay="state.autoPlay"
-        @resetVideo="handleResetVideo"
-        @backwardVideo="handleBackwardVideo"
-        @forwardVideo="handleForwardVideo"
-        @endVideo="handleEndVideo"
+        @resetVideo="ResetVideo"
+        @backwardVideo="BackwardVideo"
+        @forwardVideo="ForwardVideo"
+        @endVideo="EndVideo"
       />
       <ProgressBar
         v-show="videoEl !== null"
         :videoEl="videoEl"
         :videoData="videoData"
-        @seekVideo="handleSeekVideo"
+        @seekVideo="SeekVideo"
       />
     </div>
     <VideoSetting
       v-if="videoEl !== null"
       :videoEl="videoEl"
-      @updateAutoPlay="handleUpdateAutoPlay"
+      @updateAutoPlay="UpdateAutoPlay"
     />
   </div>
 </template>
@@ -92,32 +92,32 @@ export default defineComponent({
       videoData.value = updatedState;
       state.name = videoData.value.IVideo[videoData.value.videoIndex].name;
     };
-    const handleResetVideo = () => {
+    const ResetVideo = () => {
       if (videoEl.value) {
         videoEl.value.currentTime = 0;
       }
     };
-    const handleBackwardVideo = (interval: number) => {
+    const BackwardVideo = (interval: number) => {
       if (videoEl.value) {
         videoEl.value.currentTime -= interval;
       }
     };
-    const handleForwardVideo = (interval: number) => {
+    const ForwardVideo = (interval: number) => {
       if (videoEl.value) {
         videoEl.value.currentTime += interval;
       }
     };
-    const handleEndVideo = () => {
+    const EndVideo = () => {
       if (videoEl.value) {
         videoEl.value.currentTime = videoEl.value.duration;
       }
     };
-    const handleSeekVideo = (time: number) => {
+    const SeekVideo = (time: number) => {
       if (videoEl.value) {
         videoEl.value.currentTime = time;
       }
     };
-    const handleUpdateAutoPlay = (autoPlay: boolean) => {
+    const UpdateAutoPlay = (autoPlay: boolean) => {
       state.autoPlay = autoPlay;
     };
 
@@ -132,14 +132,14 @@ export default defineComponent({
       canvas,
       ctx,
       updateSrc,
-      handleResetVideo,
-      handleBackwardVideo,
-      handleForwardVideo,
-      handleEndVideo,
-      handleSeekVideo,
+      ResetVideo,
+      BackwardVideo,
+      ForwardVideo,
+      EndVideo,
+      SeekVideo,
       videoData,
       updateState,
-      handleUpdateAutoPlay,
+      UpdateAutoPlay,
     };
   },
 });

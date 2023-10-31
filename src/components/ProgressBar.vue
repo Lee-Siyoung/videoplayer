@@ -112,17 +112,13 @@ export default defineComponent({
       }
     };
     onUpdated(() => {
-      const timerWrapperElement = document.querySelector(
-        ".timer"
-      ) as HTMLElement;
-      const progressbarElement = document.querySelector(
-        ".progressbar"
-      ) as HTMLElement;
-      if (timerWrapperElement && progressbarElement && props.videoEl) {
+      const timerWrapper = document.querySelector(".timer") as HTMLElement;
+      const progressbar = document.querySelector(".progressbar") as HTMLElement;
+      if (timerWrapper && progressbar && props.videoEl) {
         const barLength =
           (props.videoEl.currentTime / props.videoEl.duration) *
-            timerWrapperElement.clientWidth || 0;
-        progressbarElement.style.width = barLength + "px";
+            timerWrapper.clientWidth || 0;
+        progressbar.style.width = barLength + "px";
       }
     });
     watch(
