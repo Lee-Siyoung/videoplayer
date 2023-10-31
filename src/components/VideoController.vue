@@ -4,6 +4,8 @@
     <button class="stop" @click="toggleStop" data-icon="S"></button>
     <button class="rwd" @click="goBackward" data-icon="B"></button>
     <button class="fwd" @click="goForward" data-icon="F"></button>
+    <button class="rrwd" @click="goFpsBackward" data-icon="p"></button>
+    <button class="ffwd" @click="goFpsForward" data-icon="j"></button>
   </div>
 </template>
 
@@ -11,6 +13,7 @@
 import { defineComponent, PropType, reactive, watch } from "vue";
 interface State {
   interval: number;
+  intervalFps: number;
 }
 export default defineComponent({
   props: {
@@ -29,10 +32,13 @@ export default defineComponent({
     "forwardVideo",
     "endVideo",
     "firstStop",
+    "fpsBackwardVideo",
+    "fpsForwardVideo",
   ],
   setup(props, { emit }) {
     const state = reactive<State>({
       interval: 10,
+      intervalFps: 1,
     });
     const togglePlay = () => {
       if (props.videoEl) {
@@ -82,6 +88,30 @@ export default defineComponent({
       }
     };
 
+    const goFpsBackward = () => {
+      if (props.videoEl) {
+        if (props.videoEl.currentTime <= state.intervalFps) {
+          emit("resetVideo");
+          toggleStop();
+        } else {
+          emit("fpsBackwardVideo", state.intervalFps);
+        }
+      }
+    };
+
+    const goFpsForward = () => {
+      if (props.videoEl) {
+        if (
+          props.videoEl.currentTime >=
+          props.videoEl.duration - state.intervalFps
+        ) {
+          emit("endVideo");
+        } else {
+          emit("fpsForwardVideo", state.intervalFps);
+        }
+      }
+    };
+
     watch(
       () => props.videoEl,
       (newVideoEl) => {
@@ -97,7 +127,15 @@ export default defineComponent({
       },
       { immediate: true }
     );
-    return { goForward, goBackward, togglePlay, toggleStop, firstStop };
+    return {
+      goForward,
+      goBackward,
+      togglePlay,
+      toggleStop,
+      firstStop,
+      goFpsBackward,
+      goFpsForward,
+    };
   },
 });
 </script>
@@ -159,7 +197,7 @@ export default defineComponent({
 .play {
   border-radius: 10px 0 0 10px;
 }
-.fwd {
+.ffwd {
   border-radius: 0 10px 10px 0;
 }
 .controls > button:hover,

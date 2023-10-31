@@ -30,12 +30,15 @@
         @forwardVideo="ForwardVideo"
         @endVideo="EndVideo"
         @firstStop="firstStop"
+        @fpsBackwardVideo="fpsBackwardVideo"
+        @fpsForwardVideo="fpsForwardVideo"
       />
       <ProgressBar
         v-show="videoEl !== null"
         :videoEl="videoEl"
         :videoData="videoData"
         @seekVideo="SeekVideo"
+        @timeCode="timeCode"
       />
     </div>
     <VideoSetting
@@ -56,6 +59,7 @@ import VideoSetting from "./VideoSetting.vue";
 interface State {
   autoPlay: boolean;
   name: string;
+  timeCode: string;
 }
 interface VideoState {
   videoIndex: number;
@@ -84,7 +88,15 @@ export default defineComponent({
       videoIndex: 0,
       IVideo: [],
     });
-    const state = reactive<State>({ autoPlay: false, name: "" });
+    const state = reactive<State>({
+      autoPlay: false,
+      name: "",
+      timeCode: "00:00:00:00",
+    });
+    const timeCode = (timeCode: string) => {
+      state.timeCode = timeCode;
+      console.log(state.timeCode);
+    };
     const updateSrc = (src: string) => {
       if (videoEl.value) {
         videoEl.value.src = src;
@@ -116,6 +128,16 @@ export default defineComponent({
       }
     };
     const ForwardVideo = (interval: number) => {
+      if (videoEl.value) {
+        videoEl.value.currentTime += interval;
+      }
+    };
+    const fpsBackwardVideo = (interval: number) => {
+      if (videoEl.value) {
+        videoEl.value.currentTime -= interval;
+      }
+    };
+    const fpsForwardVideo = (interval: number) => {
       if (videoEl.value) {
         videoEl.value.currentTime += interval;
       }
@@ -155,6 +177,9 @@ export default defineComponent({
       UpdateAutoPlay,
       currentTime,
       firstStop,
+      fpsBackwardVideo,
+      fpsForwardVideo,
+      timeCode,
     };
   },
 });

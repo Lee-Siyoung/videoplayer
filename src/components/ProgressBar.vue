@@ -39,7 +39,7 @@ export default defineComponent({
       required: true,
     },
   },
-  emits: ["seekVideo"],
+  emits: ["seekVideo", "timeCode"],
   setup(props, { emit }) {
     const state = reactive<State>({
       videoDuration: "00:00",
@@ -50,7 +50,6 @@ export default defineComponent({
 
     const setTime = () => {
       if (props.videoEl) {
-        state.timeCode = smpteTimeCode(props.videoEl.currentTime);
         const minutes = Math.floor(props.videoEl.currentTime / 60);
         const seconds = Math.floor(props.videoEl.currentTime - minutes * 60);
         const totalMinutes = Math.floor(props.videoEl.duration / 60);
@@ -110,6 +109,7 @@ export default defineComponent({
     const update = () => {
       if (props.videoEl) {
         state.timeCode = smpteTimeCode(props.videoEl.currentTime);
+        emit("timeCode", state.timeCode);
       }
     };
     onUpdated(() => {
