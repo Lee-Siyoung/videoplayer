@@ -15,6 +15,12 @@ interface State {
   interval: number;
   intervalFps: number;
 }
+interface Video {
+  src: string;
+  name: string;
+  fps: number;
+  currentTime: number;
+}
 export default defineComponent({
   props: {
     videoEl: {
@@ -23,6 +29,10 @@ export default defineComponent({
     },
     autoPlay: {
       type: Boolean,
+      required: true,
+    },
+    videoData: {
+      type: Object as () => { videoIndex: number; IVideo: Video[] },
       required: true,
     },
   },
@@ -90,24 +100,28 @@ export default defineComponent({
 
     const goFpsBackward = () => {
       if (props.videoEl) {
-        if (props.videoEl.currentTime <= state.intervalFps) {
+        const videoFps = props.videoData.IVideo[props.videoData.videoIndex].fps;
+        const frameDuration = 1 / videoFps;
+        if (props.videoEl.currentTime <= frameDuration) {
           emit("resetVideo");
           toggleStop();
         } else {
-          emit("fpsBackwardVideo", state.intervalFps);
+          emit("fpsBackwardVideo", frameDuration);
         }
       }
     };
 
     const goFpsForward = () => {
       if (props.videoEl) {
+        const videoFps = props.videoData.IVideo[props.videoData.videoIndex].fps;
+        const frameDuration = 1 / videoFps;
         if (
           props.videoEl.currentTime >=
-          props.videoEl.duration - state.intervalFps
+          props.videoEl.duration - frameDuration
         ) {
           emit("endVideo");
         } else {
-          emit("fpsForwardVideo", state.intervalFps);
+          emit("fpsForwardVideo", frameDuration);
         }
       }
     };

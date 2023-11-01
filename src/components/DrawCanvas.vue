@@ -89,7 +89,7 @@ export default defineComponent({
       { immediate: true }
     );
 
-    return { drawCanvas, localCtx, localCanvas };
+    return { drawCanvas, localCtx, localCanvas, state };
   },
 });
 </script>

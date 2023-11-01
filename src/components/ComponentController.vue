@@ -25,6 +25,7 @@
         v-if="videoEl !== null"
         :videoEl="videoEl"
         :autoPlay="state.autoPlay"
+        :videoData="videoData"
         @resetVideo="ResetVideo"
         @backwardVideo="BackwardVideo"
         @forwardVideo="ForwardVideo"
@@ -95,7 +96,6 @@ export default defineComponent({
     });
     const timeCode = (timeCode: string) => {
       state.timeCode = timeCode;
-      console.log(state.timeCode);
     };
     const updateSrc = (src: string) => {
       if (videoEl.value) {
@@ -132,14 +132,14 @@ export default defineComponent({
         videoEl.value.currentTime += interval;
       }
     };
-    const fpsBackwardVideo = (interval: number) => {
+    const fpsBackwardVideo = (frameDuration: number) => {
       if (videoEl.value) {
-        videoEl.value.currentTime -= interval;
+        videoEl.value.currentTime -= frameDuration;
       }
     };
-    const fpsForwardVideo = (interval: number) => {
+    const fpsForwardVideo = (frameDuration: number) => {
       if (videoEl.value) {
-        videoEl.value.currentTime += interval;
+        videoEl.value.currentTime += frameDuration;
       }
     };
     const EndVideo = () => {
