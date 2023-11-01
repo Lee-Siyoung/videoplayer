@@ -33,6 +33,7 @@
         @firstStop="firstStop"
         @fpsBackwardVideo="fpsBackwardVideo"
         @fpsForwardVideo="fpsForwardVideo"
+        @setVolume="setVolume"
       />
       <ProgressBar
         v-show="videoEl !== null"
@@ -155,6 +156,9 @@ export default defineComponent({
     const UpdateAutoPlay = (autoPlay: boolean) => {
       state.autoPlay = autoPlay;
     };
+    const setVolume = (volume: number) => {
+      if (videoEl.value) videoEl.value.volume = volume;
+    };
 
     onMounted(() => {
       if (canvas.value) {
@@ -180,6 +184,7 @@ export default defineComponent({
       fpsBackwardVideo,
       fpsForwardVideo,
       timeCode,
+      setVolume,
     };
   },
 });

@@ -6,14 +6,34 @@
     <button class="fwd" @click="goForward" data-icon="F"></button>
     <button class="rrwd" @click="goFpsBackward" data-icon="p"></button>
     <button class="ffwd" @click="goFpsForward" data-icon="j"></button>
+    <button class="volume" @click="toggleVolume" data-icon="g"></button>
+    <input
+      v-if="state.showVolume"
+      type="range"
+      class="volumeBar"
+      min="0"
+      max="1"
+      step="0.01"
+      v-model="state.volume"
+      @input="setVolume"
+    />
   </div>
+  <div class="volume-level" v-if="state.showVolume">{{ volumeLevel }}</div>
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, reactive, watch, onUnmounted } from "vue";
+import {
+  defineComponent,
+  PropType,
+  reactive,
+  watch,
+  onUnmounted,
+  computed,
+} from "vue";
 interface State {
   interval: number;
-  intervalFps: number;
+  volume: number;
+  showVolume: boolean;
 }
 interface Video {
   src: string;
@@ -44,12 +64,27 @@ export default defineComponent({
     "firstStop",
     "fpsBackwardVideo",
     "fpsForwardVideo",
+    "setVolume",
   ],
   setup(props, { emit }) {
     const state = reactive<State>({
       interval: 10,
-      intervalFps: 1,
+      volume: 1,
+      showVolume: false,
     });
+    const toggleVolume = () => {
+      state.showVolume = !state.showVolume;
+    };
+    const setVolume = (event: Event) => {
+      const target = event.target as HTMLInputElement;
+      if (target) {
+        state.volume = parseFloat(target.value);
+        if (props.videoEl) {
+          emit("setVolume", state.volume);
+        }
+      }
+    };
+    const volumeLevel = computed(() => `${Math.round(state.volume * 100)}%`);
 
     const handleKeydown = (event: KeyboardEvent) => {
       switch (event.key) {
@@ -153,6 +188,7 @@ export default defineComponent({
       () => props.videoEl,
       (newVideoEl) => {
         if (newVideoEl) {
+          newVideoEl.volume = state.volume;
           newVideoEl.addEventListener("loadedmetadata", () => {
             if (props.autoPlay) {
               togglePlay();
@@ -165,6 +201,7 @@ export default defineComponent({
       { immediate: true }
     );
     return {
+      state,
       goForward,
       goBackward,
       togglePlay,
@@ -173,6 +210,9 @@ export default defineComponent({
       goFpsBackward,
       goFpsForward,
       handleKeydown,
+      toggleVolume,
+      setVolume,
+      volumeLevel,
     };
   },
 });
@@ -231,12 +271,24 @@ export default defineComponent({
   border: 0;
   flex: 1;
 }
-
 .play {
   border-radius: 10px 0 0 10px;
 }
-.ffwd {
+.volume {
   border-radius: 0 10px 10px 0;
+}
+.volumeBar {
+  position: absolute;
+  left: 26vw;
+  bottom: 0.5vw;
+  cursor: pointer;
+}
+.volume-level {
+  color: #fff;
+  position: absolute;
+  display: inline-block;
+  left: 40vw;
+  bottom: 4vw;
 }
 .controls > button:hover,
 .controls > button:focus {
