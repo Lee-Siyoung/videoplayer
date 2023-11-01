@@ -1,5 +1,5 @@
 <template>
-  <div class="controls" ref="controlEl">
+  <div class="controls" ref="controlEl" @keydown="handleKeydown">
     <button class="play" @click="togglePlay" data-icon="P"></button>
     <button class="stop" @click="toggleStop" data-icon="S"></button>
     <button class="rwd" @click="goBackward" data-icon="B"></button>
@@ -10,7 +10,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, reactive, watch } from "vue";
+import { defineComponent, PropType, reactive, watch, onUnmounted } from "vue";
 interface State {
   interval: number;
   intervalFps: number;
@@ -49,6 +49,29 @@ export default defineComponent({
     const state = reactive<State>({
       interval: 10,
       intervalFps: 1,
+    });
+
+    const handleKeydown = (event: KeyboardEvent) => {
+      switch (event.key) {
+        case "ArrowLeft":
+          if (event.ctrlKey) goFpsBackward();
+          else goBackward();
+          break;
+        case "ArrowRight":
+          if (event.ctrlKey) goFpsForward();
+          else goForward();
+          break;
+        case " ":
+          togglePlay();
+          break;
+        case "Enter":
+          toggleStop();
+          break;
+      }
+    };
+    document.addEventListener("keydown", handleKeydown);
+    onUnmounted(() => {
+      document.removeEventListener("keydown", handleKeydown);
     });
     const togglePlay = () => {
       if (props.videoEl) {
@@ -149,6 +172,7 @@ export default defineComponent({
       firstStop,
       goFpsBackward,
       goFpsForward,
+      handleKeydown,
     };
   },
 });
