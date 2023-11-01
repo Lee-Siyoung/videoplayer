@@ -68,7 +68,7 @@ export default defineComponent({
 .action {
   position: relative;
   top: 20px;
-  left: 65vh;
+  left: 60vh;
   height: 30vw;
 }
 .action .profile {

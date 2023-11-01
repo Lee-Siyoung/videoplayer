@@ -34,6 +34,7 @@ interface State {
   interval: number;
   volume: number;
   showVolume: boolean;
+  plusMinusVolume: number;
 }
 interface Video {
   src: string;
@@ -70,6 +71,7 @@ export default defineComponent({
     const state = reactive<State>({
       interval: 10,
       volume: 1,
+      plusMinusVolume: 0.01,
       showVolume: false,
     });
     const toggleVolume = () => {
@@ -96,6 +98,18 @@ export default defineComponent({
           if (event.ctrlKey) goFpsForward();
           else goForward();
           break;
+        case "ArrowUp":
+          if (state.volume + state.plusMinusVolume <= 1) {
+            state.volume += state.plusMinusVolume;
+            emit("setVolume", state.volume);
+            break;
+          } else break;
+        case "ArrowDown":
+          if (state.volume - state.plusMinusVolume > 0) {
+            state.volume -= state.plusMinusVolume;
+            emit("setVolume", state.volume);
+            break;
+          } else break;
         case " ":
           togglePlay();
           break;

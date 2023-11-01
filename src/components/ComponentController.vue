@@ -111,7 +111,6 @@ export default defineComponent({
       videoData.value.IVideo[index].currentTime = currentTime;
       videoData.value.IVideo[index].src =
         videoData.value.IVideo[index].src.split("#t=")[0] + "#t=" + currentTime;
-      console.log(videoData.value.IVideo[index].src);
     };
     const ResetVideo = () => {
       if (videoEl.value) {
