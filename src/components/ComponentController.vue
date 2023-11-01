@@ -210,8 +210,8 @@ h1 {
   right: -54px;
   top: 1vw;
   border: 1px solid #fff;
-  width: 55vw;
-  height: 45vw;
+  width: 114vh;
+  height: 93vh;
 }
 video {
   height: 50vh;

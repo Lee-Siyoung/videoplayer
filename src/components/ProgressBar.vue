@@ -153,7 +153,7 @@ export default defineComponent({
 .timer {
   line-height: 100px;
   color: #fff;
-  height: 5vw;
+  height: 80px;
   position: relative;
 }
 
@@ -167,7 +167,7 @@ export default defineComponent({
   left: 0;
   top: 0;
   width: 0;
-  height: 5vw;
+  height: 80px;
   z-index: 2;
 }
 .timer span {

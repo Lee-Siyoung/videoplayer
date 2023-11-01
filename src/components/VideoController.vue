@@ -17,8 +17,8 @@
       v-model="state.volume"
       @input="setVolume"
     />
+    <div class="volume-level" v-if="state.showVolume">{{ volumeLevel }}</div>
   </div>
-  <div class="volume-level" v-if="state.showVolume">{{ volumeLevel }}</div>
 </template>
 
 <script lang="ts">
@@ -233,8 +233,8 @@ export default defineComponent({
   width: 400px;
   border-radius: 10px;
   position: relative;
-  bottom: -10vw;
-  left: 50%;
+  bottom: -20vh;
+  left: 50vh;
   background-color: black;
   box-shadow: 3px 3px 5px black;
   transition: 1s all;
@@ -279,16 +279,16 @@ export default defineComponent({
 }
 .volumeBar {
   position: absolute;
-  left: 26vw;
-  bottom: 0.5vw;
+  left: 405px;
+  bottom: 8px;
   cursor: pointer;
 }
 .volume-level {
   color: #fff;
   position: absolute;
   display: inline-block;
-  left: 40vw;
-  bottom: 4vw;
+  left: 450px;
+  bottom: 30px;
 }
 .controls > button:hover,
 .controls > button:focus {
