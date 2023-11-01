@@ -1,6 +1,10 @@
 <template>
   <div class="controls" ref="controlEl" @keydown="handleKeydown">
-    <button class="play" @click="togglePlay" data-icon="P"></button>
+    <button
+      class="play"
+      @click="togglePlay"
+      :data-icon="state.isPlay ? 'u' : 'P'"
+    ></button>
     <button class="stop" @click="toggleStop" data-icon="S"></button>
     <button class="rwd" @click="goBackward" data-icon="B"></button>
     <button class="fwd" @click="goForward" data-icon="F"></button>
@@ -35,6 +39,7 @@ interface State {
   volume: number;
   showVolume: boolean;
   plusMinusVolume: number;
+  isPlay: boolean;
 }
 interface Video {
   src: string;
@@ -71,8 +76,9 @@ export default defineComponent({
     const state = reactive<State>({
       interval: 10,
       volume: 1,
-      plusMinusVolume: 0.01,
+      plusMinusVolume: 0.005,
       showVolume: false,
+      isPlay: false,
     });
     const toggleVolume = () => {
       state.showVolume = !state.showVolume;
@@ -126,8 +132,10 @@ export default defineComponent({
       if (props.videoEl) {
         if (props.videoEl.paused) {
           props.videoEl.play();
+          state.isPlay = true;
         } else {
           props.videoEl.pause();
+          state.isPlay = false;
         }
       }
     };
